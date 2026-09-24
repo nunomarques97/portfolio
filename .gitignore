@@ -1,0 +1,101 @@
+# This repository will become public. Nothing below may ever be committed.
+# If you add a new kind of secret or local file, add its pattern here BEFORE creating the file.
+# The pre-commit hook in .githooks/ blocks secrets that slip past these patterns.
+
+# ---------------------------------------------------------------- secrets & credentials
+.env
+.env.*
+!.env.example
+*.env
+.envrc
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.cer
+*.der
+*.jks
+*.keystore
+*.asc
+*.gpg
+id_rsa*
+id_ed25519*
+*.ppk
+credentials.json
+credentials*.json
+service-account*.json
+google-services.json
+GoogleService-Info.plist
+*token*
+*secret*
+*apikey*
+*api_key*
+*api-key*
+.netrc
+.npmrc
+.pypirc
+auth.json
+keys.json
+*.local.yaml
+*.local.yml
+*.local.json
+*.local.toml
+
+# ---------------------------------------------------------------- local runtime data and logs
+*.log
+/logs/
+/tmp/
+/temp/
+.tmp*/
+
+# ---------------------------------------------------------------- local assistant settings and session data
+.claude/settings.local.json
+.claude/*.local.*
+.claude/projects/
+.claude/todos/
+.claude/shell-snapshots/
+.claude/statsig/
+.claude/ide/
+CLAUDE.local.md
+*.jsonl
+transcripts/
+sessions/
+
+# ---------------------------------------------------------------- dependencies & build output
+node_modules/
+.pnpm-store/
+.yarn/
+dist/
+build/
+out/
+coverage/
+.turbo/
+.next/
+.nuxt/
+.astro/
+.svelte-kit/
+.vercel/
+.netlify/
+.vite/
+.cache/
+*.tsbuildinfo
+playwright-report/
+test-results/
+
+# ---------------------------------------------------------------- editors & OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+*.lnk
+
+# private-edition-only: begin
+# Internal working material. It must never reach the public edition of this repository.
+/docs/forja/
+.forja/
+# private-edition-only: end

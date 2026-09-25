@@ -17,7 +17,9 @@ export default defineConfig({
     baseURL,
     // An installed browser (Edge on Windows by default), so no browser download is needed.
     channel: browserChannel(),
-    trace: 'retain-on-failure',
+    // No trace screencast: the page animates continuously, so frame capture in parallel browsers
+    // starves their renderers and makes the tests time out. DOM snapshots are still recorded.
+    trace: { mode: 'retain-on-failure', screenshots: false },
   },
   webServer: {
     // Always a fresh production build: never reuse a server that happens to be running.

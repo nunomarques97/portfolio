@@ -1,0 +1,108 @@
+---
+// Featured projects, in content order, followed by a link to the full GitHub profile.
+import { isPlaceholder, portfolio, type Portfolio } from '../content/portfolio';
+import Placeholder from './Placeholder.astro';
+import ProjectCard from './ProjectCard.astro';
+
+interface Props {
+  projects?: Portfolio['projects'];
+  ui?: Portfolio['ui'];
+}
+
+const { projects = portfolio.projects, ui = portfolio.ui } = Astro.props;
+const featured = projects.items.filter((project) => project.featured);
+const { profileLink } = projects;
+---
+
+<section id="projects" class="projects" aria-labelledby="projects-heading">
+  <div class="section-inner">
+    <p class="eyebrow">{projects.eyebrow}</p>
+    <h2 id="projects-heading">{projects.heading}</h2>
+    <ul class="project-list">
+      {
+        featured.map((project, index) => (
+          <li>
+            <ProjectCard project={project} index={index} ui={ui} />
+          </li>
+        ))
+      }
+    </ul>
+    {
+      isPlaceholder(profileLink.href) ? (
+        <Placeholder class="profile-link profile-link-placeholder">
+          {profileLink.label}
+          <span class="placeholder-note">{ui.comingSoon}</span>
+        </Placeholder>
+      ) : (
+        <a class="profile-link" href={profileLink.href} target="_blank" rel="noopener noreferrer">
+          {profileLink.label}
+          <span aria-hidden="true"> ↗</span>
+          <span class="visually-hidden"> {ui.opensInNewTab}</span>
+        </a>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .project-list {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Flex items drop leading spaces, so the gap separates the label from the arrow and note. */
+  .profile-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6em;
+    max-width: 100%;
+    min-height: 44px;
+    margin-top: var(--space-5);
+    padding: 12px 20px;
+    border: 1px solid var(--border-control);
+    border-radius: var(--radius-pill);
+    font-family: var(--font-mono);
+    font-size: var(--text-button);
+    letter-spacing: 0.1em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+  }
+
+  a.profile-link {
+    background: var(--surface-panel);
+    color: var(--text-primary);
+    text-decoration: none;
+    transition:
+      transform var(--duration-base) var(--ease-out),
+      box-shadow var(--duration-base) var(--ease-out);
+  }
+
+  a.profile-link:hover {
+    box-shadow: 0 0 40px rgb(167 139 250 / 0.45);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    a.profile-link:hover {
+      transform: translateY(-2px);
+    }
+  }
+
+  .profile-link-placeholder {
+    border-style: dashed;
+  }
+
+  .placeholder-note::before {
+    content: '· ';
+  }
+
+  @media (max-width: 820px) {
+    a.profile-link {
+      background: var(--surface-panel-mobile);
+    }
+  }
+</style>

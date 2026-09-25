@@ -56,6 +56,12 @@ export interface Link {
   readonly href: string;
 }
 
+/** A link whose target may not be supplied yet; a placeholder renders as non-interactive text. */
+export interface PendingLink {
+  readonly label: string;
+  readonly href: Pending<string>;
+}
+
 export interface Stat {
   readonly value: string;
   readonly label: string;
@@ -77,7 +83,7 @@ export interface Project {
   readonly title: string;
   readonly pitch: string;
   readonly tags: readonly string[];
-  readonly url: string;
+  readonly url: Pending<string>;
   /** Featured projects are rendered, in array order. */
   readonly featured: boolean;
 }
@@ -105,7 +111,7 @@ export interface ContactLink {
   readonly kind: 'email' | 'linkedin' | 'github';
   readonly label: string;
   readonly display: string;
-  readonly href: string;
+  readonly href: Pending<string>;
   readonly external: boolean;
 }
 
@@ -147,6 +153,8 @@ export interface Portfolio {
     readonly eyebrow: string;
     readonly heading: string;
     readonly items: readonly Project[];
+    /** Link to the full GitHub profile, after the featured projects. */
+    readonly profileLink: PendingLink;
   };
   readonly skills: {
     readonly eyebrow: string;
@@ -312,6 +320,7 @@ export const portfolio: Portfolio = {
         featured: false,
       },
     ],
+    profileLink: { label: 'All projects on GitHub', href: githubProfile },
   },
   skills: {
     eyebrow: 'Stack',

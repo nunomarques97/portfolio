@@ -1,28 +1,14 @@
 ---
+import ExperienceContact from '../components/ExperienceContact.astro';
 import HeroAbout from '../components/HeroAbout.astro';
-import { portfolio } from '../content/portfolio';
+import Projects from '../components/Projects.astro';
+import Skills from '../components/Skills.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
-
-// Sections whose bodies are not built yet render their eyebrow and heading, so every navigation target exists.
-const { projects, skills, experience, contact } = portfolio;
-const pending = [
-  { id: 'projects', ...projects },
-  { id: 'skills', ...skills },
-  { id: 'experience', ...experience },
-  { id: 'contact', ...contact },
-];
 ---
 
 <BaseLayout>
   <HeroAbout />
-  {
-    pending.map((section) => (
-      <section id={section.id} aria-labelledby={`${section.id}-heading`}>
-        <div class="section-inner">
-          <p class="eyebrow">{section.eyebrow}</p>
-          <h2 id={`${section.id}-heading`}>{section.heading}</h2>
-        </div>
-      </section>
-    ))
-  }
+  <Projects />
+  <Skills />
+  <ExperienceContact />
 </BaseLayout>

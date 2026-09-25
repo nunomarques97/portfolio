@@ -1,0 +1,287 @@
+---
+// Career timeline (roles, then education) and the contact rows. Any contact value that is still a placeholder
+// renders as non-interactive "Coming soon" text, so a recruiter never follows a broken link.
+import { isPlaceholder, portfolio, type Portfolio } from '../content/portfolio';
+import Placeholder from './Placeholder.astro';
+
+interface Props {
+  experience?: Portfolio['experience'];
+  contact?: Portfolio['contact'];
+  ui?: Portfolio['ui'];
+}
+
+const { experience = portfolio.experience, contact = portfolio.contact, ui = portfolio.ui } = Astro.props;
+
+interface TimelineEntry {
+  period: string;
+  title: string;
+  organisation: string;
+  current: boolean;
+  summary?: string;
+  highlights?: readonly string[];
+}
+
+const timeline: TimelineEntry[] = [
+  ...experience.roles.map((role) => ({ ...role, organisation: experience.employer })),
+  ...experience.education.map((entry) => ({
+    period: entry.period,
+    title: entry.degree,
+    organisation: entry.school,
+    current: false,
+  })),
+];
+
+// The CV is served by this site; anything else would be an off-site or protocol-relative link.
+const cvFile = contact.cv.file;
+if (!isPlaceholder(cvFile) && !/^\/(?![/\\])\S+$/.test(cvFile)) {
+  throw new Error(`contact.cv.file: "${cvFile}" must be a same-origin path such as "/nuno-marques-cv.pdf"`);
+}
+const cvFormat = isPlaceholder(cvFile) ? '' : (/\.([a-z0-9]+)$/i.exec(cvFile)?.[1]?.toUpperCase() ?? '');
+---
+
+<section id="experience" class="experience" aria-labelledby="experience-heading">
+  <div class="section-inner">
+    <p class="eyebrow">{experience.eyebrow}</p>
+    <h2 id="experience-heading">{experience.heading}</h2>
+    <ol class="timeline">
+      {
+        timeline.map((entry) => (
+          <li class:list={['timeline-entry', { 'timeline-current': entry.current }]}>
+            <h3>{entry.title}</h3>
+            <p class="timeline-meta">
+              <span class="timeline-period">{entry.period}</span>
+              <span class="timeline-organisation">{entry.organisation}</span>
+            </p>
+            {entry.summary && <p class="timeline-summary">{entry.summary}</p>}
+            {entry.highlights && (
+              <ul class="timeline-highlights">
+                {entry.highlights.map((highlight) => (
+                  <li>{highlight}</li>
+                ))}
+              </ul>
+            )}
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<section id="contact" class="contact" aria-labelledby="contact-heading">
+  <div class="section-inner">
+    <p class="eyebrow">{contact.eyebrow}</p>
+    <h2 id="contact-heading" class="contact-heading">{contact.heading}</h2>
+    <p class="contact-lede">{contact.lede}</p>
+    <ul class="contact-list">
+      {
+        contact.links.map((link) => (
+          <li>
+            {isPlaceholder(link.href) ? (
+              <Placeholder class="contact-row" data-contact={link.kind}>
+                <span class="contact-label">
+                  {link.label} · {ui.comingSoon}
+                </span>
+                <span class="contact-value">{link.display}</span>
+              </Placeholder>
+            ) : link.external ? (
+              <a
+                class="contact-row"
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-contact={link.kind}
+              >
+                <span class="contact-label">
+                  {link.label}
+                  <span aria-hidden="true"> ↗</span>
+                </span>
+                <span class="contact-value">{link.display}</span>
+                <span class="visually-hidden"> {ui.opensInNewTab}</span>
+              </a>
+            ) : (
+              <a class="contact-row" href={link.href} data-contact={link.kind}>
+                <span class="contact-label">{link.label}</span>
+                <span class="contact-value">{link.display}</span>
+              </a>
+            )}
+          </li>
+        ))
+      }
+      <li>
+        {
+          isPlaceholder(cvFile) ? (
+            <Placeholder class="contact-row" data-contact="cv">
+              <span class="contact-label">{ui.comingSoon}</span>
+              <span class="contact-value">{contact.cv.label}</span>
+            </Placeholder>
+          ) : (
+            <a class="contact-row" href={cvFile} download data-contact="cv">
+              <span class="contact-label">{cvFormat}</span>
+              <span class="contact-value">{contact.cv.label}</span>
+            </a>
+          )
+        }
+      </li>
+    </ul>
+  </div>
+</section>
+
+<style>
+  .timeline {
+    margin: 0;
+    padding: 0;
+    border-left: 1px solid var(--line-hairline);
+    list-style: none;
+  }
+
+  /* The heading stays first in the DOM for heading navigation; the period and organisation show above it. */
+  .timeline-entry {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 0 0 26px 26px;
+  }
+
+  .timeline-entry:last-child {
+    padding-bottom: 0;
+  }
+
+  .timeline-entry::before {
+    position: absolute;
+    top: 8px;
+    left: -5px;
+    width: 9px;
+    height: 9px;
+    border: 1px solid var(--accent-cyan);
+    border-radius: 50%;
+    background: var(--color-bg);
+    content: '';
+  }
+
+  .timeline-current::before {
+    background: var(--accent-cyan);
+    box-shadow: 0 0 16px var(--accent-cyan);
+  }
+
+  .timeline-meta {
+    order: -1;
+    margin: 0;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: 0.08em;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+
+  .timeline-organisation::before {
+    content: ' · ';
+  }
+
+  .timeline-entry h3 {
+    margin: 2px 0 4px;
+    font-size: var(--text-h3-small);
+    font-weight: var(--weight-bold);
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+
+  .timeline-summary,
+  .timeline-highlights {
+    margin: 0;
+    color: var(--text-body);
+    font-size: var(--text-small);
+    overflow-wrap: anywhere;
+  }
+
+  .timeline-highlights {
+    padding-left: 18px;
+  }
+
+  .contact-heading {
+    font-size: var(--text-contact);
+  }
+
+  .contact-lede {
+    max-width: 34ch;
+    margin: 0;
+    color: var(--text-body);
+    font-size: var(--text-lede);
+  }
+
+  .contact-list {
+    display: grid;
+    gap: 10px;
+    margin: 30px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* The label comes first for assistive technology; on desktop it shows to the right of the value. */
+  .contact-row {
+    display: flex;
+    flex-direction: row-reverse;
+    gap: var(--space-4);
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+    padding: 18px 22px;
+    border: 1px solid var(--border-control);
+    border-radius: var(--radius-control);
+    background: var(--surface-panel);
+    backdrop-filter: blur(10px);
+  }
+
+  a.contact-row {
+    color: var(--text-primary);
+    text-decoration: none;
+    transition:
+      border-color var(--duration-base) var(--ease-out),
+      box-shadow var(--duration-base) var(--ease-out);
+  }
+
+  a.contact-row:hover {
+    border-color: var(--accent-amber);
+    box-shadow: 0 0 40px rgb(251 191 36 / 0.2);
+  }
+
+  .contact-row[data-placeholder] {
+    border-style: dashed;
+  }
+
+  .contact-value {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .contact-label {
+    flex: none;
+    max-width: 50%;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    letter-spacing: var(--tracking-label);
+    text-align: right;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 820px) {
+    .contact-lede {
+      max-width: none;
+    }
+
+    .contact-row {
+      flex-direction: column;
+      gap: var(--space-1);
+      align-items: flex-start;
+      background: var(--surface-panel-mobile);
+      backdrop-filter: none;
+    }
+
+    .contact-label {
+      max-width: none;
+      text-align: left;
+    }
+  }
+</style>

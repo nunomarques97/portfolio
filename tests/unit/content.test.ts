@@ -44,8 +44,12 @@ describe('projects', () => {
       expect(project.pitch.trim(), project.repo).not.toBe('');
       expect(project.tags.length, project.repo).toBeGreaterThan(0);
       expect(project.url).toBe(`${githubProfile}/${project.repo}`);
-      expect(new URL(project.url).pathname.split('/')[1]).toBe('nunomarques97');
+      expect(new URL(String(project.url)).pathname.split('/')[1]).toBe('nunomarques97');
     }
+  });
+
+  it('links the full GitHub profile after the featured projects', () => {
+    expect(portfolio.projects.profileLink.href).toBe(githubProfile);
   });
 
   it('builds one GitHub link label per title', () => {
@@ -89,7 +93,7 @@ describe('links', () => {
 
   it('marks external links as external and in-page links as internal', () => {
     for (const link of portfolio.contact.links) {
-      expect(link.external, link.kind).toBe(link.href.startsWith('https:'));
+      expect(link.external, link.kind).toBe(String(link.href).startsWith('https:'));
     }
     expect(portfolio.hero.primaryAction.href).toBe('#projects');
     expect(portfolio.hero.secondaryAction.href).toBe('#contact');

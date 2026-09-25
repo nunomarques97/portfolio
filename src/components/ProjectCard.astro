@@ -1,0 +1,144 @@
+---
+// One featured project. `index` is its position among the featured projects: it sets the "01" label and the
+// scene cluster the card maps to. A placeholder URL renders as non-interactive text instead of a link.
+import { isPlaceholder, type Portfolio, type Project } from '../content/portfolio';
+import Placeholder from './Placeholder.astro';
+
+interface Props {
+  project: Project;
+  index: number;
+  ui: Pick<Portfolio['ui'], 'projectLink' | 'opensInNewTab' | 'comingSoon'>;
+}
+
+const { project, index, ui } = Astro.props;
+const titleId = `project-${project.repo}-title`;
+const linkLabel = ui.projectLink(project.title);
+---
+
+<article class="panel project-card" aria-labelledby={titleId} data-cluster={index}>
+  <h3 id={titleId} class="project-title">{project.title}</h3>
+  <p class="project-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</p>
+  <p class="project-pitch">{project.pitch}</p>
+  <ul class="project-tags">
+    {project.tags.map((tag) => <li>{tag}</li>)}
+  </ul>
+  {
+    isPlaceholder(project.url) ? (
+      <Placeholder class="project-link project-link-placeholder">
+        {linkLabel}
+        <span class="placeholder-note">{ui.comingSoon}</span>
+      </Placeholder>
+    ) : (
+      <a class="project-link" href={project.url} target="_blank" rel="noopener noreferrer">
+        {linkLabel}
+        <span aria-hidden="true"> ↗</span>
+        <span class="visually-hidden"> {ui.opensInNewTab}</span>
+      </a>
+    )
+  }
+</article>
+
+<style>
+  /* The index is read before the title visually; the title stays first in the DOM so it names the card. */
+  .project-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 24px 24px 20px;
+    transition:
+      border-color var(--duration-emphasis) var(--ease-out),
+      box-shadow var(--duration-emphasis) var(--ease-out),
+      transform var(--duration-emphasis) var(--ease-out);
+  }
+
+  /* Set by the scene choreography on the card being read (desktop only). */
+  .project-card[data-active='true'] {
+    border-color: var(--border-active);
+    box-shadow:
+      0 0 0 1px rgb(34 211 238 / 0.25),
+      0 0 60px rgb(34 211 238 / 0.15);
+  }
+
+  @media (prefers-reduced-motion: no-preference) and (min-width: 821px) {
+    .project-card[data-active='true'] {
+      transform: translateX(8px);
+    }
+  }
+
+  .project-index {
+    order: -1;
+    margin: 0;
+    color: var(--text-accent);
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    letter-spacing: 0.2em;
+  }
+
+  .project-title {
+    margin: 6px 0 8px;
+    font-size: var(--text-h3);
+    font-weight: var(--weight-bold);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+
+  .project-pitch {
+    margin: 0 0 14px;
+    color: var(--text-body);
+    overflow-wrap: anywhere;
+  }
+
+  .project-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0 0 14px;
+    padding: 0;
+    list-style: none;
+  }
+
+  .project-tags li {
+    max-width: 100%;
+    padding: 4px 9px;
+    border: 1px solid var(--line-hairline);
+    border-radius: var(--radius-pill);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+  .project-link {
+    align-self: flex-start;
+    max-width: 100%;
+    padding: 6px 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: 0.1em;
+    line-height: 1.4;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+  }
+
+  a.project-link {
+    color: var(--text-signal);
+    text-decoration: none;
+  }
+
+  a.project-link:hover,
+  a.project-link:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .project-link-placeholder {
+    padding: 6px 12px;
+    border-radius: var(--radius-chip);
+  }
+
+  .placeholder-note::before {
+    content: ' · ';
+  }
+</style>

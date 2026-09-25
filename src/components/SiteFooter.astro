@@ -1,0 +1,23 @@
+---
+import { portfolio } from '../content/portfolio';
+---
+
+<footer class="site-footer">
+  <p>{portfolio.footer.copyright}</p>
+</footer>
+
+<style>
+  .site-footer {
+    position: relative;
+    z-index: 2;
+    padding: var(--space-7) var(--gutter);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    letter-spacing: 0.1em;
+  }
+
+  p {
+    margin: 0;
+  }
+</style>

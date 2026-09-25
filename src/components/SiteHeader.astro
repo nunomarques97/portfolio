@@ -1,0 +1,168 @@
+---
+import { portfolio } from '../content/portfolio';
+
+const { ui, sections } = portfolio;
+const links = sections.flatMap((section) =>
+  section.navLabel ? [{ href: `#${section.id}`, label: section.navLabel }] : [],
+);
+---
+
+<header class="site-header">
+  <nav class="site-nav" aria-label={ui.navLabel} data-site-nav>
+    <!-- Only shown on narrow screens when scripts run; without them the list itself stays visible. -->
+    <button type="button" class="menu-button" aria-expanded="false" aria-controls="site-nav-list" data-menu-button>
+      {ui.menuButton}
+    </button>
+    <ul class="nav-list" id="site-nav-list">
+      {
+        links.map((link) => (
+          <li>
+            <a href={link.href}>{link.label}</a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</header>
+
+<script>
+  const nav = document.querySelector<HTMLElement>('[data-site-nav]');
+  const button = nav?.querySelector<HTMLButtonElement>('[data-menu-button]');
+
+  if (nav && button) {
+    const setOpen = (open: boolean) => button.setAttribute('aria-expanded', String(open));
+    const isOpen = () => button.getAttribute('aria-expanded') === 'true';
+
+    button.addEventListener('click', () => setOpen(!isOpen()));
+
+    nav.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || !isOpen()) return;
+      setOpen(false);
+      button.focus();
+    });
+
+    // Choosing a link closes the menu; the browser then moves focus to the target section.
+    nav.addEventListener('click', (event) => {
+      if (event.target instanceof Element && event.target.closest('a')) setOpen(false);
+    });
+
+    document.addEventListener('pointerdown', (event) => {
+      if (isOpen() && event.target instanceof Node && !nav.contains(event.target)) setOpen(false);
+    });
+
+    // The disclosure only exists on narrow screens; widening the window resets it.
+    matchMedia('(min-width: 821px)').addEventListener('change', (event) => {
+      if (event.matches) setOpen(false);
+    });
+  }
+</script>
+
+<style>
+  .site-header {
+    position: fixed;
+    top: 12px;
+    right: var(--gutter);
+    z-index: 3;
+  }
+
+  .nav-list {
+    display: flex;
+    gap: var(--space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nav-list a,
+  .menu-button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid transparent;
+    border-radius: var(--radius-pill);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition:
+      color var(--duration-base),
+      border-color var(--duration-base),
+      background-color var(--duration-base);
+  }
+
+  .nav-list a:hover,
+  .nav-list a[aria-current='location'] {
+    border-color: var(--border-control);
+    background: var(--surface-panel);
+    color: var(--text-primary);
+  }
+
+  .menu-button {
+    display: none;
+    min-height: 44px;
+    padding: var(--space-2) var(--space-4);
+    border-color: var(--border-control);
+    background: var(--surface-panel-mobile);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    cursor: pointer;
+  }
+
+  @media (max-width: 820px) {
+    /* Without scripts the list stays in the page flow and wraps under the status readout. */
+    .site-header {
+      position: absolute;
+      top: 48px;
+      left: var(--gutter);
+    }
+
+    .nav-list {
+      flex-wrap: wrap;
+    }
+
+    .nav-list a {
+      min-height: 44px;
+    }
+
+    :global(.js) .site-header {
+      position: fixed;
+      top: 8px;
+      left: auto;
+    }
+
+    :global(.js) .menu-button {
+      display: inline-flex;
+    }
+
+    :global(.js) .nav-list {
+      display: none;
+    }
+
+    :global(.js) .menu-button[aria-expanded='true'] + .nav-list {
+      position: fixed;
+      top: 64px;
+      right: var(--gutter);
+      left: var(--gutter);
+      display: grid;
+      gap: var(--space-1);
+      padding: var(--space-2);
+      border: 1px solid var(--border-control);
+      border-radius: var(--radius-control);
+      /* Backed by the page colour: page content must not show through the open menu. */
+      background: linear-gradient(var(--surface-panel-mobile), var(--surface-panel-mobile)), var(--color-bg);
+      box-shadow: 0 24px 48px rgb(4 6 13 / 0.6);
+    }
+
+    :global(.js) .menu-button[aria-expanded='true'] + .nav-list a {
+      display: flex;
+      min-height: 48px;
+      padding: var(--space-2) var(--space-4);
+      border-radius: var(--radius-chip);
+      color: var(--text-primary);
+      font-size: var(--text-label);
+    }
+  }
+</style>

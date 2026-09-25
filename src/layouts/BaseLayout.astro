@@ -1,0 +1,307 @@
+---
+import '../styles/theme.css';
+import SiteFooter from '../components/SiteFooter.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import { portfolio } from '../content/portfolio';
+
+const { site, ui, sections } = portfolio;
+const pad = (value: number) => String(value).padStart(2, '0');
+const firstSection = sections[0];
+---
+
+<!doctype html>
+<html lang={site.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{site.title}</title>
+    <meta name="description" content={site.description} />
+    <meta name="author" content={site.author} />
+    <meta name="theme-color" content="#04060d" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={site.title} />
+    <meta property="og:description" content={site.description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- Marks the document as scripted before first paint, so enhanced layouts never flash their fallback. -->
+    <script is:inline>
+      document.documentElement.classList.add('js');
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{ui.skipLink}</a>
+
+    <!-- Decorative backdrop. The scene canvas is mounted between the grid and the scrim. -->
+    <div class="scene-layer" aria-hidden="true" inert data-scene-layer>
+      <div class="scene-fallback"></div>
+      <div class="scene-grid"></div>
+      <div class="scene-scrim"></div>
+      <div class="scene-scanlines"></div>
+      <div class="scene-topfade"></div>
+    </div>
+
+    <div class="hud" aria-hidden="true" inert>
+      <div class="hud-status"><span class="hud-dot"></span><span>{ui.hudTitle}</span></div>
+      <div class="hud-section">
+        <div>{ui.hudSection} <b data-hud-index>{pad(1)}</b> / {pad(sections.length)}</div>
+        <div data-hud-state>{firstSection?.hudState}</div>
+      </div>
+    </div>
+
+    <SiteHeader />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <SiteFooter />
+  </body>
+</html>
+
+<style is:global>
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    background: var(--color-bg);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  :focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  /* The skip target receives programmatic focus only; it is not a control. */
+  #main:focus {
+    outline: none;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .skip-link {
+    position: absolute;
+    top: var(--space-4);
+    left: var(--space-4);
+    z-index: 10;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-pill);
+    background: var(--text-primary);
+    color: var(--color-bg);
+    font-family: var(--font-mono);
+    font-size: var(--text-button);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transform: translateY(calc(-100% - var(--space-6)));
+  }
+
+  .skip-link:focus {
+    transform: none;
+  }
+
+  /* Backdrop, bottom to top: fallback glow, grid, scene canvas, scrim, scanlines, top fade. */
+  .scene-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .scene-layer > * {
+    position: absolute;
+    inset: 0;
+  }
+
+  .scene-fallback {
+    background:
+      radial-gradient(60vw 60vw at 72% 45%, var(--scene-fallback-glow-a), transparent 60%),
+      radial-gradient(50vw 50vw at 85% 80%, var(--scene-fallback-glow-b), transparent 60%),
+      var(--color-bg);
+  }
+
+  .scene-grid {
+    opacity: 0.35;
+    background-image:
+      linear-gradient(var(--line-hairline) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line-hairline) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse at 50% 100%, black 10%, transparent 70%);
+    transform: perspective(600px) rotateX(58deg) translateY(30vh) scale(2);
+    transform-origin: 50% 100%;
+  }
+
+  .scene-scrim {
+    background: linear-gradient(
+      90deg,
+      rgb(4 6 13 / var(--scrim-column-peak-alpha)) 0%,
+      rgb(4 6 13 / var(--scrim-column-alpha)) calc(var(--gutter) + var(--column)),
+      rgb(4 6 13 / 0) calc(var(--gutter) + var(--column) + 12vw)
+    );
+  }
+
+  .scene-scanlines {
+    opacity: 0.07;
+    background: repeating-linear-gradient(0deg, #fff 0 1px, transparent 1px 3px);
+    mix-blend-mode: overlay;
+  }
+
+  .scene-topfade {
+    bottom: auto;
+    height: 88px;
+    background: linear-gradient(var(--color-bg) 56px, rgb(4 6 13 / 0) 88px);
+  }
+
+  .hud {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    user-select: none;
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .hud-status {
+    position: absolute;
+    top: 20px;
+    left: var(--gutter);
+    display: flex;
+    gap: 14px;
+    align-items: center;
+  }
+
+  .hud-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent-cyan);
+    box-shadow: 0 0 12px var(--accent-cyan);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hud-dot {
+      animation: hud-pulse var(--duration-pulse) infinite;
+    }
+  }
+
+  @keyframes hud-pulse {
+    50% {
+      opacity: 0.3;
+    }
+  }
+
+  .hud-section {
+    position: absolute;
+    right: var(--gutter);
+    bottom: 20px;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-chip);
+    background: rgb(4 6 13 / var(--scrim-column-alpha));
+    text-align: right;
+  }
+
+  .hud-section b {
+    color: var(--text-signal);
+    font-weight: var(--weight-mono-strong);
+  }
+
+  main {
+    position: relative;
+    z-index: 2;
+  }
+
+  main > section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100vh;
+    padding: var(--section-pad-top) var(--gutter) var(--section-pad-bottom);
+  }
+
+  .section-inner {
+    width: var(--column);
+    max-width: 100%;
+  }
+
+  .eyebrow {
+    margin: 0 0 18px;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--text-signal);
+  }
+
+  .eyebrow::before {
+    content: '// ';
+    color: var(--text-accent);
+  }
+
+  h2 {
+    margin: 0 0 28px;
+    font-size: var(--text-h2);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-heading);
+    letter-spacing: var(--tracking-heading);
+  }
+
+  .panel {
+    padding: 26px;
+    border: 1px solid var(--line-hairline);
+    border-radius: var(--radius-card);
+    background: var(--surface-panel);
+    backdrop-filter: blur(10px);
+  }
+
+  @media (max-width: 820px) {
+    .scene-scrim {
+      background: rgb(4 6 13 / var(--scrim-mobile-alpha));
+    }
+
+    .scene-grid,
+    .scene-scanlines,
+    .hud-section {
+      display: none;
+    }
+
+    .panel {
+      background: var(--surface-panel-mobile);
+      backdrop-filter: none;
+    }
+  }
+</style>

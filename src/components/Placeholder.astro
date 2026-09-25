@@ -1,0 +1,26 @@
+---
+// Stand-in for a fact that has not been supplied yet (see `placeholder()` in the content file).
+// It is never a link, has no hover state and makes no request; tests find it by `data-placeholder`.
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends HTMLAttributes<'div'> {
+  /** Element to render: `span` inside text rows, `div` for boxes. */
+  as?: 'div' | 'span';
+  /** Decorative placeholders add no information and are hidden from assistive technology. */
+  decorative?: boolean;
+}
+
+const { as: Tag = 'span', decorative = false, class: className, ...rest } = Astro.props;
+---
+
+<Tag class:list={['placeholder', className]} data-placeholder aria-hidden={decorative ? 'true' : undefined} {...rest}>
+  <slot />
+</Tag>
+
+<style>
+  .placeholder {
+    border: 1px dashed var(--border-control);
+    color: var(--text-muted);
+    cursor: default;
+  }
+</style>

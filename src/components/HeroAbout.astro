@@ -1,0 +1,245 @@
+---
+import { portfolio } from '../content/portfolio';
+import PortraitSlot from './PortraitSlot.astro';
+
+const { hero, about } = portfolio;
+const nameLines = hero.name.split(' ');
+---
+
+<section id="hero" class="hero" aria-labelledby="hero-name">
+  <div class="section-inner">
+    <p class="eyebrow">
+      <span>{hero.title}</span><span class="eyebrow-separator">{hero.location}</span>
+    </p>
+    <h1 id="hero-name" class="hero-name">
+      {
+        nameLines.map((line, index) => (
+          <>
+            {index > 0 && ' '}
+            <span class="hero-name-line">{line}</span>
+          </>
+        ))
+      }
+    </h1>
+    <p class="lede">{hero.tagline}</p>
+    <div class="actions">
+      <a class="button button-primary" href={hero.primaryAction.href}>{hero.primaryAction.label}</a>
+      <a class="button button-secondary" href={hero.secondaryAction.href}>{hero.secondaryAction.label}</a>
+    </div>
+    <p class="availability">{hero.availability}</p>
+  </div>
+</section>
+
+<section id="about" class="about" aria-labelledby="about-heading">
+  <div class="section-inner">
+    <div class="about-header">
+      <PortraitSlot portrait={about.portrait} />
+      <div class="about-title">
+        <p class="eyebrow">{about.eyebrow}</p>
+        <h2 id="about-heading">{about.heading}</h2>
+      </div>
+    </div>
+    <div class="panel about-panel">
+      {about.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+    </div>
+    <dl class="stats">
+      {
+        about.stats.map((stat) => (
+          <div class="stat">
+            <dt>{stat.label}</dt>
+            <dd>{stat.value}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+</section>
+
+<style>
+  /* Keeps the location on the line of its separator. */
+  .eyebrow-separator {
+    white-space: nowrap;
+  }
+
+  .eyebrow-separator::before {
+    content: ' · ';
+    color: var(--text-muted);
+  }
+
+  .hero-name {
+    margin: 0 0 var(--space-5);
+    font-size: var(--text-display);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-display);
+    letter-spacing: var(--tracking-display);
+  }
+
+  .hero-name-line {
+    display: block;
+    background: linear-gradient(100deg, var(--display-start) 20%, var(--display-mid) 55%, var(--display-end) 90%);
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 24px rgb(34 211 238 / 0.35));
+  }
+
+  /* Forced colours drop background images, so the name falls back to plain text there. */
+  @media (forced-colors: active) {
+    .hero-name-line {
+      background: none;
+      color: CanvasText;
+    }
+  }
+
+  .lede {
+    max-width: 34ch;
+    margin: 0;
+    color: var(--text-body);
+    font-size: var(--text-lede);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: 36px;
+  }
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 14px 20px;
+    border: 1px solid var(--border-control);
+    border-radius: var(--radius-pill);
+    font-family: var(--font-mono);
+    font-size: var(--text-button);
+    font-weight: var(--weight-mono-strong);
+    letter-spacing: 0.1em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition:
+      transform var(--duration-base) var(--ease-out),
+      box-shadow var(--duration-base) var(--ease-out);
+  }
+
+  .button-primary {
+    border-color: transparent;
+    background: linear-gradient(90deg, var(--button-fill-start), var(--button-fill-end));
+    box-shadow: 0 0 32px rgb(34 211 238 / 0.35);
+    color: var(--text-on-accent);
+  }
+
+  .button-secondary {
+    background: var(--surface-panel);
+    backdrop-filter: blur(8px);
+    color: var(--text-primary);
+  }
+
+  .button:hover {
+    box-shadow: 0 0 40px rgb(167 139 250 / 0.45);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .button:hover {
+      transform: translateY(-2px);
+    }
+  }
+
+  .availability {
+    margin: 26px 0 0;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: 0.08em;
+  }
+
+  .about-header {
+    display: flex;
+    gap: var(--space-5);
+    align-items: flex-end;
+    margin-bottom: 28px;
+  }
+
+  .about-title {
+    min-width: 0;
+    /* Lines the heading up with the bottom of the frame, above the caption under it. */
+    padding-bottom: 30px;
+  }
+
+  .about-title h2 {
+    margin: 0;
+  }
+
+  .about-panel p {
+    margin: 0 0 14px;
+    color: var(--text-body);
+  }
+
+  .about-panel p:last-child {
+    margin: 0;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    margin: var(--space-7) 0 0;
+    overflow: hidden;
+    border: 1px solid var(--line-hairline);
+    border-radius: var(--radius-control);
+    background: var(--line-hairline);
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    padding: 18px;
+    background: rgb(4 6 13 / 0.75);
+  }
+
+  .stat dd {
+    margin: 0;
+    font-size: 30px;
+    font-weight: var(--weight-bold);
+    letter-spacing: -0.03em;
+    line-height: 1.3;
+  }
+
+  .stat dt {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 820px) {
+    .lede {
+      max-width: none;
+    }
+
+    .button-secondary {
+      background: var(--surface-panel-mobile);
+      backdrop-filter: none;
+    }
+
+    .about-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .about-title {
+      padding-bottom: 0;
+    }
+
+    .stat {
+      padding: 14px;
+    }
+
+    .stat dd {
+      font-size: 24px;
+    }
+  }
+</style>

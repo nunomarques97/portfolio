@@ -110,7 +110,7 @@ export interface Education {
 }
 
 export interface ContactLink {
-  readonly kind: 'email' | 'linkedin' | 'github';
+  readonly kind: 'email' | 'phone' | 'linkedin' | 'github';
   readonly label: string;
   readonly display: string;
   readonly href: Pending<string>;
@@ -410,6 +410,7 @@ export const portfolio: Portfolio = {
     email,
     links: [
       { kind: 'email', label: 'Email', display: email, href: `mailto:${email}`, external: false },
+      { kind: 'phone', label: 'Phone', display: '+351 911 022 458', href: 'tel:+351911022458', external: false },
       {
         kind: 'linkedin',
         label: 'LinkedIn',

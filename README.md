@@ -44,8 +44,9 @@ text, link, project, skill or role never needs a component change:
 - **Page metadata and interface labels:** `site` and `ui`.
 
 A value that is not available yet is written as `placeholder('what to put here')`. Placeholders never render as
-links: a pending link shows as non-interactive text and the pending portrait as a decorative frame. Keep the file in English and never
-add a phone number or other private details; the unit tests reject phone numbers.
+links: a pending link shows as non-interactive text and the pending portrait as a decorative frame. Keep the file in English. The only
+approved private details are the contact email, phone number and LinkedIn; the unit tests reject any other phone
+number.
 
 ### Remaining placeholders
 
@@ -53,12 +54,9 @@ add a phone number or other private details; the unit tests reject phone numbers
 npm run placeholders
 ```
 
-lists every placeholder left, with its path and what to supply. Currently:
-
-- `about.portrait.photo`: add the photo as `src/assets/portrait/nuno-marques.jpg` (4:5, at least 704 × 880 px) and
-  set the value to that path. Astro optimizes it at build time and uses `about.portrait.alt` as its alt text.
-- `contact.cv.file`: add the CV as `public/nuno-marques-cv.pdf` and set the value to `"/nuno-marques-cv.pdf"`. The
-  "Download CV" row then becomes a download link.
+lists every placeholder left, with its path and what to supply. There are none at the moment: the portrait is
+`src/assets/portrait/nuno-marques.png` (a larger 4:5 photo, at least 704 × 880 px, would be sharper) and the CV is
+`public/nuno-marques-cv.pdf`.
 
 ## Test
 

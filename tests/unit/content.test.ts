@@ -1,5 +1,4 @@
 import { execFile } from 'node:child_process';
-import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { findPlaceholders, isPlaceholder, placeholder, portfolio } from '../../src/content/portfolio';
@@ -62,7 +61,7 @@ describe('links', () => {
   const urls = allStrings.filter(({ value }) => /^[a-z][a-z0-9+.-]*:/i.test(value));
 
   it('uses https for every web URL', () => {
-    const web = urls.filter(({ value }) => !value.startsWith('mailto:'));
+    const web = urls.filter(({ value }) => !value.startsWith('mailto:') && !value.startsWith('tel:'));
     expect(web.length).toBeGreaterThan(0);
     for (const { path, value } of web) {
       expect(new URL(value).protocol, path).toBe('https:');
@@ -102,14 +101,14 @@ describe('links', () => {
 });
 
 describe('private data', () => {
-  it('contains no phone number or tel link', () => {
+  it('contains only the approved phone number, as a tel link in contact', () => {
     const phone = /\+?\d[\d\s().-]{7,}\d/;
+    const approved = new Set(['+351 911 022 458', 'tel:+351911022458']);
     for (const { path, value } of allStrings) {
-      expect(value, path).not.toMatch(phone);
-      expect(value, path).not.toMatch(/^tel:/i);
+      if (phone.test(value)) expect(approved.has(value), path).toBe(true);
     }
-    const source = readFileSync(fileURLToPath(new URL('../../src/content/portfolio.ts', import.meta.url)), 'utf8');
-    expect(source).not.toMatch(/tel:|\+351|phone/i);
+    const link = portfolio.contact.links.find((item) => item.kind === 'phone');
+    expect(link).toMatchObject({ display: '+351 911 022 458', href: 'tel:+351911022458', external: false });
   });
 });
 

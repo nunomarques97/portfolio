@@ -216,6 +216,12 @@ const nameLines = hero.name.split(' ');
   }
 
   @media (max-width: 820px) {
+    /* The particle field fills the upper part of the first screen; the introduction sits below it. */
+    .hero {
+      justify-content: flex-end;
+      padding-bottom: var(--space-7);
+    }
+
     .lede {
       max-width: none;
     }

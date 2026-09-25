@@ -347,14 +347,18 @@ test.describe('scene: default', () => {
 test.describe('scene: mobile', () => {
   test.use({ viewport: mobile, deviceScaleFactor: 3 });
 
-  test('uses the lite tier with the pixel ratio capped at 1.5 and a dimmed canvas', async ({ page }) => {
+  test('uses the lite tier with the pixel ratio capped at 1.5, a full-brightness canvas and backed text', async ({ page }) => {
     const watch = await observe(page);
     await page.goto('/');
     await expect(sceneState(page)).toHaveAttribute('data-scene', 'running');
     expect(await probe(page)).toMatchObject({ tier: 'lite', particles: 9_000 });
     const scene = page.locator(canvas);
     expect(await scene.evaluate((element: HTMLCanvasElement) => element.width)).toBe(mobile.width * 1.5);
-    expect(await scene.evaluate((element) => getComputedStyle(element).opacity)).toBe('0.6');
+    expect(await scene.evaluate((element) => getComputedStyle(element).opacity)).toBe('1');
+    // Text keeps its contrast through its own backing instead of a dimmed scene.
+    expect(await page.locator('#hero .section-inner').evaluate((element) => getComputedStyle(element).backgroundColor)).toBe(
+      'rgba(4, 6, 13, 0.85)',
+    );
     expect(await canvasPixels(page, { x: 0, y: 200, width: mobile.width, height: 500 })).toBeGreaterThan(500);
     expect(watch.errors).toEqual([]);
   });

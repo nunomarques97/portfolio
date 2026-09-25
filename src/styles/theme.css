@@ -36,13 +36,13 @@
  * @pair large --display-mid on --color-bg/--scrim-column-alpha over --color-particle-peak
  * @pair large --display-end on --color-bg/--scrim-column-alpha over --color-particle-peak
  *
- * Mobile: full-width text over the dimmed scene and the uniform mobile scrim
- * @pair body --text-primary on --color-bg/--scrim-mobile-alpha over --color-particle-peak/--scene-mobile-opacity over --color-bg
- * @pair body --text-body on --color-bg/--scrim-mobile-alpha over --color-particle-peak/--scene-mobile-opacity over --color-bg
- * @pair body --text-muted on --color-bg/--scrim-mobile-alpha over --color-particle-peak/--scene-mobile-opacity over --color-bg
- * @pair body --text-signal on --color-bg/--scrim-mobile-alpha over --color-particle-peak/--scene-mobile-opacity over --color-bg
- * @pair body --text-accent on --color-bg/--scrim-mobile-alpha over --color-particle-peak/--scene-mobile-opacity over --color-bg
- * @pair large --display-end on --color-bg/--scrim-mobile-alpha over --color-particle-peak/--scene-mobile-opacity over --color-bg
+ * Mobile: each text block carries its own backing over the full-brightness scene
+ * @pair body --text-primary on --color-bg/--backing-mobile-alpha over --color-particle-peak
+ * @pair body --text-body on --color-bg/--backing-mobile-alpha over --color-particle-peak
+ * @pair body --text-muted on --color-bg/--backing-mobile-alpha over --color-particle-peak
+ * @pair body --text-signal on --color-bg/--backing-mobile-alpha over --color-particle-peak
+ * @pair body --text-accent on --color-bg/--backing-mobile-alpha over --color-particle-peak
+ * @pair large --display-end on --color-bg/--backing-mobile-alpha over --color-particle-peak
  *
  * Primary button label on both ends of its gradient fill
  * @pair body --text-on-accent on --button-fill-start
@@ -54,11 +54,11 @@
  * Interactive boundaries and focus ring, against the page and the scrim
  * @pair ui --border-control on --color-bg
  * @pair ui --border-control on --color-bg/--scrim-column-alpha over --color-particle-peak
- * @pair ui --border-control on --color-bg/--scrim-mobile-alpha over --color-particle-peak/--scene-mobile-opacity over --color-bg
+ * @pair ui --border-control on --color-bg/--backing-mobile-alpha over --color-particle-peak
  * @pair ui --border-active on --color-bg/--scrim-column-alpha over --color-particle-peak
  * @pair focus --focus-ring on --color-bg
  * @pair focus --focus-ring on --color-bg/--scrim-column-alpha over --color-particle-peak
- * @pair focus --focus-ring on --color-bg/--scrim-mobile-alpha over --color-particle-peak/--scene-mobile-opacity over --color-bg
+ * @pair focus --focus-ring on --color-bg/--backing-mobile-alpha over --color-particle-peak
  */
 
 :root {
@@ -102,8 +102,9 @@
   /* Scene layering */
   --scrim-column-alpha: 0.85;
   --scrim-column-peak-alpha: 0.92;
-  --scrim-mobile-alpha: 0.78;
-  --scene-mobile-opacity: 0.6;
+  --scrim-mobile-alpha: 0.2;
+  --backing-mobile-alpha: 0.85;
+  --scene-mobile-opacity: 1;
   --scene-fallback-glow-a: rgba(34, 211, 238, 0.16);
   --scene-fallback-glow-b: rgba(167, 139, 250, 0.14);
 

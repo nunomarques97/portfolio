@@ -20,6 +20,8 @@ import { fragmentShader, vertexShader } from './shaders';
 
 /** On desktop the field sits to the right of the content column. */
 const DESKTOP_OFFSET_X = 2;
+/** On mobile the field sits in the upper half of the screen, above the text blocks. */
+const MOBILE_OFFSET_Y = 1.1;
 const FALLBACK_COLOR = '#22d3ee';
 
 export interface ParticleSceneOptions {
@@ -140,6 +142,7 @@ export function createParticleScene(options: ParticleSceneOptions): ParticleScen
       camera.aspect = width / Math.max(1, height);
       camera.updateProjectionMatrix();
       group.position.x = narrow ? 0 : DESKTOP_OFFSET_X;
+      group.position.y = narrow ? MOBILE_OFFSET_Y : 0;
     },
 
     frame(dt) {

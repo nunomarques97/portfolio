@@ -58,22 +58,22 @@ Every pair is declared as an `@pair` annotation in `theme.css` and checked by th
 composited in sRGB, as the browser blends them. The scene uses additive blending, so a dense area can saturate to pure
 white; `--color-particle-peak: #ffffff` is therefore the worst case for every section colour, including the beacon.
 
-| Foreground | On page `#04060d` | On desktop scrim (0.85) over white particle | On mobile scrim (0.78) over dimmed scene (0.6) | Minimum |
+| Foreground | On page `#04060d` | On desktop scrim (0.85) over white particle | On mobile text backing (0.85) over white particle | Minimum |
 | --- | --- | --- | --- | --- |
-| `--text-primary` | 17.80 | 12.37 | 13.13 | 4.5 |
-| `--text-body` | 13.53 | 9.40 | 9.99 | 4.5 |
-| `--text-muted` | 7.87 | 5.47 | 5.81 | 4.5 |
-| `--text-signal` | 11.21 | 7.79 | 8.27 | 4.5 |
-| `--text-accent` | 7.44 | 5.17 | 5.49 | 4.5 |
-| Display gradient `#ffffff` / `#22d3ee` / `#a78bfa` | — | 14.07 / 7.79 / 5.17 | – / – / 5.49 | 3 |
-| `--border-control` | 4.53 | 3.15 | 3.34 | 3 |
+| `--text-primary` | 17.80 | 12.37 | 12.37 | 4.5 |
+| `--text-body` | 13.53 | 9.40 | 9.40 | 4.5 |
+| `--text-muted` | 7.87 | 5.47 | 5.47 | 4.5 |
+| `--text-signal` | 11.21 | 7.79 | 7.79 | 4.5 |
+| `--text-accent` | 7.44 | 5.17 | 5.17 | 4.5 |
+| Display gradient `#ffffff` / `#22d3ee` / `#a78bfa` | — | 14.07 / 7.79 / 5.17 | – / – / 5.17 | 3 |
+| `--border-control` | 4.53 | 3.15 | 3.15 | 3 |
 | `--border-active` | — | 3.75 | — | 3 |
 | `--focus-ring` | 11.21 | 7.79 | 8.27 | 3 |
 
 Other pairs: `--text-on-accent` on the button gradient ends, 11.21 (cyan) and 7.44 (violet); `--text-primary` on a
 skill chip over the scrim, 10.89. Panels and cards only darken what lies beneath them, so the scrim values are
-their lower bound. A lighter mobile scrim (0.35 over a 0.85-opacity scene) fails: muted text drops below 4.5:1 over
-a bright particle. The test keeps that case as a regression check.
+their lower bound. A uniform light scrim (0.35) over a bright particle fails: muted text drops below 4.5:1. That is why mobile
+text carries its own backing instead. The test keeps that case as a regression check.
 
 ## Typography
 
@@ -114,8 +114,10 @@ right half of the viewport (centre around x ≈ 1040). Sections are at least 100
 padding, and content is vertically centred. The nav sits top-right at the gutter; the HUD sits top-left and
 bottom-right.
 
-**390 × 844.** Gutter 19.5 px (5vw), so content spans the full width (351 px). The scene is centred (no x offset),
-drawn at 0.6 opacity under a uniform 0.78 scrim, so text reads over it anywhere. Section top padding is 14vh.
+**390 × 844.** Gutter 19.5 px (5vw), so content spans the full width (351 px). The scene is centred horizontally and raised
+1.1 units so its formations fill the upper part of the screen, drawn at full opacity under a light 0.2 scrim.
+Each text block (section content and footer) carries its own feathered 0.85 backing, so text keeps the desktop
+contrast while particles shine in the gaps; the hero introduction sits at the bottom of the first screen. Section top padding is 14vh.
 Multi-column blocks stack: skills become one column, contact rows put the label above the value. The bottom-right
 HUD is hidden. Nothing scales the desktop poster down: the composition changes from "column beside scene" to
 "content over atmosphere".
@@ -254,7 +256,8 @@ Layout, scrim and scene opacity switch by viewport width only. The particle tier
 Performance budget), so a wide coarse-pointer device keeps the desktop layout with the lite particle count.
 
 - 9,000 particles (desktop 26,000), DPR capped at 1.5, base sprite size 34 (desktop 30) to keep density readable.
-- The scene is centred, at 0.6 canvas opacity under a uniform 0.78 scrim, and panels use `--surface-panel-mobile`
+- The scene is raised 1.1 units, at full canvas opacity under a 0.2 scrim; text blocks carry a feathered 0.85
+  backing, and panels use `--surface-panel-mobile`
   without backdrop blur.
 - Simplified choreography: the same formations, colours and keyframes, but no active-cluster camera retargeting (the
   card highlight remains), no pointer parallax, and the scanline overlay and perspective grid are dropped.
@@ -305,7 +308,7 @@ shown and the HUD shows its initial state.
 
 ## Open visual points
 
-- The mobile scene is deliberately faint (0.6 opacity under a 0.78 scrim) so text passes contrast over the brightest
-  possible particle. Review it on the first production screenshots. Any change must keep `theme.test.ts` passing.
+- The mobile scene runs at full brightness; contrast comes from the per-block text backing. Any change must keep
+  `theme.test.ts` passing.
 - The portrait frame and placeholder are specified here but not yet drawn. Verify them in the About screenshots at
   1440 and 390 when the section is built.

@@ -333,6 +333,17 @@ const firstSection = sections[0];
       display: none;
     }
 
+    /*
+     * Text blocks carry their own feathered backing so the scene can run at full brightness in the gaps
+     * between them while text keeps the desktop column contrast.
+     */
+    .section-inner,
+    .site-footer {
+      border-radius: var(--radius-card);
+      background: rgb(4 6 13 / var(--backing-mobile-alpha));
+      box-shadow: 0 0 40px 28px rgb(4 6 13 / var(--backing-mobile-alpha));
+    }
+
     .panel {
       background: var(--surface-panel-mobile);
       backdrop-filter: none;

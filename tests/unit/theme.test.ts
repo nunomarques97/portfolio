@@ -150,7 +150,7 @@ describe('theme.css contrast pairs', () => {
         (p) => p.kind === 'body' && p.foreground === name && p.layers.some((l) => l.split('/')[0] === '--color-particle-peak'),
       );
       expect(scrimPairs.some((p) => p.layers[0] === '--color-bg/--scrim-column-alpha'), name).toBe(true);
-      expect(scrimPairs.some((p) => p.layers[0] === '--color-bg/--scrim-mobile-alpha'), name).toBe(true);
+      expect(scrimPairs.some((p) => p.layers[0] === '--color-bg/--backing-mobile-alpha'), name).toBe(true);
     }
     expect(variable('--color-particle-peak')).toBe('#ffffff');
   });

@@ -120,7 +120,7 @@ describe('contrast helpers', () => {
     expect(contrast(parseColor('#777777'), parseColor('#ffffff'))).toBeCloseTo(4.48, 2);
   });
 
-  it('flag a light scrim over bright particles, as the prototype mobile scrim was', () => {
+  it('flag a light scrim over bright particles', () => {
     const scrimmed = over([4, 6, 13, 0.35], parseColor('#ffffff'));
     expect(contrast(parseColor('#8fa3bf'), scrimmed)).toBeLessThan(4.5);
   });

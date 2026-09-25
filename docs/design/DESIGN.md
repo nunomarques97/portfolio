@@ -49,9 +49,8 @@ Dark "void" background, cool signal accents, and one warm accent reserved for th
 | `--chip-fill` / `--chip-line` | violet at 0.08 / 0.2 | Skill chips |
 | `--focus-ring` | `#22d3ee` | Keyboard focus |
 
-The prototype's `--line` hairline was also the only boundary of its secondary buttons and contact links, at about
-1.3:1. Production keeps the hairline for decoration and gives interactive controls `--border-control`, which reaches
-3:1 even over the scrim.
+The hairline alone would bound secondary buttons and contact links at about 1.3:1, so it stays decorative and
+interactive controls use `--border-control`, which reaches 3:1 even over the scrim.
 
 ### Contrast
 
@@ -73,8 +72,8 @@ white; `--color-particle-peak: #ffffff` is therefore the worst case for every se
 
 Other pairs: `--text-on-accent` on the button gradient ends, 11.21 (cyan) and 7.44 (violet); `--text-primary` on a
 skill chip over the scrim, 10.89. Panels and cards only darken what lies beneath them, so the scrim values are
-their lower bound. The prototype's mobile scrim (0.35 over a 0.85-opacity scene) fails: muted text drops below 4.5:1
-over a bright particle. The test keeps that case as a regression check.
+their lower bound. A lighter mobile scrim (0.35 over a 0.85-opacity scene) fails: muted text drops below 4.5:1 over
+a bright particle. The test keeps that case as a regression check.
 
 ## Typography
 
@@ -132,8 +131,7 @@ HUD is hidden. Nothing scales the desktop poster down: the composition changes f
 - **HUD** (`aria-hidden`, decorative). Top-left: pulsing 8 px cyan status dot, "NM / Signal field". Bottom-right
   (desktop only): "Section 03 / 06" with the number in `--text-signal` 600, and below it the state name (Core online,
   Signal acquired, Constellation, Lattice, Signal stream, Beacon). The readouts sit on a `--color-bg` plate at
-  `--scrim-column-alpha`. A 2 px progress bar across the top, cyan → violet → magenta, scales with page scroll. The
-  prototype's "Prototype" label is not shipped.
+  `--scrim-column-alpha`. A 2 px progress bar across the top, cyan → violet → magenta, scales with page scroll.
 - **Backdrop layers**, bottom to top: fallback glow, perspective grid (64 px `--line-hairline` squares tilted 58°,
   masked to the bottom, 0.35 opacity), scene canvas, scrim, scanline overlay (1 px white lines every 3 px, 0.07
   opacity, overlay blend), top fade, progress bar, HUD, content.

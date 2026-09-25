@@ -25,6 +25,38 @@ npm run build     # static production build in dist/
 npm run preview   # serve the production build
 ```
 
+## Edit the content
+
+All copy and data live in one typed file, `src/content/portfolio.ts`. Components only render it, so changing a
+text, link, project, skill or role never needs a component change:
+
+- **Hero and About:** `hero` (name, title, location, tagline, the two actions) and `about` (paragraphs, stats and
+  the portrait).
+- **Projects:** `projects.items`. Cards render the entries with `featured: true`, in array order; entries with
+  `featured: false` stay in the file but are not shown. The scene draws one cluster per featured project, so when the
+  number of featured projects changes, update `CLUSTER_COUNT` in `src/scene/formations.ts` (a unit test checks that
+  they match).
+- **Stack:** `skills.groups`. **Experience:** `experience.roles` (newest first) and `experience.education`.
+- **Contact:** `contact.email`, `contact.links` and `contact.cv`.
+- **Page metadata and interface labels:** `site` and `ui`.
+
+A value that is not available yet is written as `placeholder('what to put here')`. Placeholders never render as
+links: a pending link shows as non-interactive text and the pending portrait as a decorative frame. Keep the file in English and never
+add a phone number or other private details; the unit tests reject phone numbers.
+
+### Remaining placeholders
+
+```sh
+npm run placeholders
+```
+
+lists every placeholder left, with its path and what to supply. Currently:
+
+- `about.portrait.photo`: add the photo as `src/assets/portrait/nuno-marques.jpg` (4:5, at least 704 × 880 px) and
+  set the value to that path. Astro optimizes it at build time and uses `about.portrait.alt` as its alt text.
+- `contact.cv.file`: add the CV as `public/nuno-marques-cv.pdf` and set the value to `"/nuno-marques-cv.pdf"`. The
+  "Download CV" row then becomes a download link.
+
 ## Test
 
 ```sh
@@ -32,8 +64,19 @@ npm run lint        # ESLint for .ts, .mjs and .astro files
 npm run typecheck   # astro check (TypeScript strict)
 npm test            # unit tests (Vitest)
 npm run test:e2e    # browser tests (Playwright) against a fresh production build on a free port
+npm run budget      # gzip size budgets of the production build (initial JS, scene chunk, CSS, fonts)
 npm run fps         # frame rate while scrolling, in a headed browser with the GPU (1440 and 390 tiers)
+npm run placeholders
+node scripts/guard-keys.mjs --all
 ```
+
+`tests/e2e/matrix.spec.ts` checks the whole page at 1440 and 390 px in four modes (default, reduced motion, WebGL
+off, JavaScript disabled): every section and its content visible, no serious or critical axe violations, no
+horizontal overflow, no console errors and no request that leaves the site origin. It also walks the page with the
+keyboard from the skip link to the last contact link. Run it alone with `npx playwright test tests/e2e/matrix.spec.ts`.
+
+The frame rate script needs a hardware GPU: it fails rather than report a measurement taken with a software
+renderer. Its results describe the machine it runs on.
 
 Every script also runs without npm or a shell, which is useful on Windows and in automation:
 

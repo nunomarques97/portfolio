@@ -118,7 +118,7 @@ describe('copy', () => {
     expect(portfolio.hero.tagline).not.toBe('');
   });
 
-  it('uses the four skill groups of the prototype', () => {
+  it('uses the four skill groups', () => {
     expect(portfolio.skills.groups.map((group) => group.title)).toEqual([
       'Frontend',
       'Backend',

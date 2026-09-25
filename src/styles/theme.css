@@ -1,0 +1,199 @@
+/*
+ * Theme variables for the "signal field" design. The rationale and usage rules live in docs/design/DESIGN.md.
+ *
+ * Fonts are self-hosted from @fontsource packages (SIL Open Font License 1.1); only the Latin subset of the
+ * weights the design uses is bundled. The page must never request fonts or styles from another origin.
+ */
+@import '@fontsource/space-grotesk/latin-400.css';
+@import '@fontsource/space-grotesk/latin-500.css';
+@import '@fontsource/space-grotesk/latin-700.css';
+@import '@fontsource/jetbrains-mono/latin-400.css';
+@import '@fontsource/jetbrains-mono/latin-600.css';
+
+/*
+ * Contrast pairs, checked by tests/unit/theme.test.ts.
+ * Syntax: @pair <kind> <foreground> on <layer> [over <layer>...]
+ * A layer is a colour variable, optionally with an opacity variable (--colour/--opacity); layers are composited
+ * top to bottom in sRGB, as browsers blend, and the last layer must be opaque.
+ * Kinds: body >= 4.5:1; large, ui and focus >= 3:1.
+ * --color-particle-peak is the brightest colour the additive particle scene can reach (full saturation), so a
+ * pair over the scrim is the worst case for any section colour.
+ *
+ * Page background
+ * @pair body --text-primary on --color-bg
+ * @pair body --text-body on --color-bg
+ * @pair body --text-muted on --color-bg
+ * @pair body --text-signal on --color-bg
+ * @pair body --text-accent on --color-bg
+ *
+ * Desktop text column: scrim at its lightest point over the brightest particle
+ * @pair body --text-primary on --color-bg/--scrim-column-alpha over --color-particle-peak
+ * @pair body --text-body on --color-bg/--scrim-column-alpha over --color-particle-peak
+ * @pair body --text-muted on --color-bg/--scrim-column-alpha over --color-particle-peak
+ * @pair body --text-signal on --color-bg/--scrim-column-alpha over --color-particle-peak
+ * @pair body --text-accent on --color-bg/--scrim-column-alpha over --color-particle-peak
+ * @pair large --display-start on --color-bg/--scrim-column-alpha over --color-particle-peak
+ * @pair large --display-mid on --color-bg/--scrim-column-alpha over --color-particle-peak
+ * @pair large --display-end on --color-bg/--scrim-column-alpha over --color-particle-peak
+ *
+ * Mobile: full-width text over the dimmed scene and the uniform mobile scrim
+ * @pair body --text-primary on --color-bg/--scrim-mobile-alpha over --color-particle-peak/--scene-mobile-opacity over --color-bg
+ * @pair body --text-body on --color-bg/--scrim-mobile-alpha over --color-particle-peak/--scene-mobile-opacity over --color-bg
+ * @pair body --text-muted on --color-bg/--scrim-mobile-alpha over --color-particle-peak/--scene-mobile-opacity over --color-bg
+ * @pair body --text-signal on --color-bg/--scrim-mobile-alpha over --color-particle-peak/--scene-mobile-opacity over --color-bg
+ * @pair body --text-accent on --color-bg/--scrim-mobile-alpha over --color-particle-peak/--scene-mobile-opacity over --color-bg
+ * @pair large --display-end on --color-bg/--scrim-mobile-alpha over --color-particle-peak/--scene-mobile-opacity over --color-bg
+ *
+ * Primary button label on both ends of its gradient fill
+ * @pair body --text-on-accent on --button-fill-start
+ * @pair body --text-on-accent on --button-fill-end
+ *
+ * Skill chip label on its tinted fill
+ * @pair body --text-primary on --chip-fill over --color-bg/--scrim-column-alpha over --color-particle-peak
+ *
+ * Interactive boundaries and focus ring, against the page and the scrim
+ * @pair ui --border-control on --color-bg
+ * @pair ui --border-control on --color-bg/--scrim-column-alpha over --color-particle-peak
+ * @pair ui --border-control on --color-bg/--scrim-mobile-alpha over --color-particle-peak/--scene-mobile-opacity over --color-bg
+ * @pair ui --border-active on --color-bg/--scrim-column-alpha over --color-particle-peak
+ * @pair focus --focus-ring on --color-bg
+ * @pair focus --focus-ring on --color-bg/--scrim-column-alpha over --color-particle-peak
+ * @pair focus --focus-ring on --color-bg/--scrim-mobile-alpha over --color-particle-peak/--scene-mobile-opacity over --color-bg
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* Palette */
+  --color-bg: #04060d;
+  --color-particle-peak: #ffffff;
+  --accent-cyan: #22d3ee;
+  --accent-violet: #a78bfa;
+  --accent-magenta: #f472b6;
+  --accent-amber: #fbbf24;
+
+  /* Text roles. Every --text-* colour must have a body contrast pair above. */
+  --text-primary: #e8f1ff;
+  --text-body: #c7d4ea;
+  --text-muted: #8fa3bf;
+  --text-signal: #22d3ee;
+  --text-accent: #a78bfa;
+  --text-on-accent: #04060d;
+
+  /* Display heading gradient (hero name) */
+  --display-start: #ffffff;
+  --display-mid: #22d3ee;
+  --display-end: #a78bfa;
+
+  /* Surfaces and lines */
+  --surface-panel: rgba(6, 10, 22, 0.55);
+  --surface-panel-mobile: rgba(4, 6, 13, 0.72);
+  --chip-fill: rgba(167, 139, 250, 0.08);
+  --chip-line: rgba(167, 139, 250, 0.2);
+  --line-hairline: rgba(143, 163, 191, 0.18);
+  --border-control: #64789a;
+  --border-active: rgba(34, 211, 238, 0.6);
+  --button-fill-start: #22d3ee;
+  --button-fill-end: #a78bfa;
+  --focus-ring: #22d3ee;
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 4px;
+
+  /* Scene layering */
+  --scrim-column-alpha: 0.85;
+  --scrim-column-peak-alpha: 0.92;
+  --scrim-mobile-alpha: 0.78;
+  --scene-mobile-opacity: 0.6;
+  --scene-fallback-glow-a: rgba(34, 211, 238, 0.16);
+  --scene-fallback-glow-b: rgba(167, 139, 250, 0.14);
+
+  /* Particle colours per section: [a, b] pairs the scene blends between */
+  --scene-hero-a: #22d3ee;
+  --scene-hero-b: #a78bfa;
+  --scene-about-a: #38bdf8;
+  --scene-about-b: #818cf8;
+  --scene-projects-a: #22d3ee;
+  --scene-projects-b: #e0f2fe;
+  --scene-skills-a: #a78bfa;
+  --scene-skills-b: #f472b6;
+  --scene-experience-a: #22d3ee;
+  --scene-experience-b: #a78bfa;
+  --scene-contact-a: #22d3ee;
+  --scene-contact-b: #fbbf24;
+
+  /* Typography */
+  --font-sans: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-bold: 700;
+  --weight-mono-strong: 600;
+
+  --text-display: clamp(52px, 7.4vw, 112px);
+  --text-contact: clamp(44px, 6vw, 88px);
+  --text-h2: clamp(34px, 4.2vw, 60px);
+  --text-h3: 26px;
+  --text-h3-small: 20px;
+  --text-lede: clamp(18px, 1.6vw, 22px);
+  --text-base: 17px;
+  --text-small: 15px;
+  --text-chip: 14px;
+  --text-button: 13px;
+  --text-label: 12px;
+  --text-micro: 11px;
+
+  --leading-display: 0.92;
+  --leading-heading: 1;
+  --leading-body: 1.6;
+  --tracking-display: -0.04em;
+  --tracking-heading: -0.03em;
+  --tracking-label: 0.14em;
+  --tracking-eyebrow: 0.22em;
+
+  /* Spacing and layout */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 40px;
+  --space-8: 64px;
+  --gutter: clamp(16px, 5vw, 72px);
+  --column: min(560px, 44vw);
+  --section-pad-top: 18vh;
+  --section-pad-bottom: 12vh;
+  --radius-chip: 8px;
+  --radius-control: 14px;
+  --radius-card: 18px;
+  --radius-pill: 999px;
+
+  /* Motion */
+  --duration-fast: 150ms;
+  --duration-base: 300ms;
+  --duration-emphasis: 500ms;
+  --duration-reveal: 900ms;
+  --duration-decode: 900ms;
+  --duration-pulse: 2000ms;
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (max-width: 820px) {
+  :root {
+    --column: 100%;
+    --text-base: 16px;
+    --section-pad-top: 14vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-emphasis: 0ms;
+    --duration-reveal: 0ms;
+    --duration-decode: 0ms;
+    --duration-pulse: 0ms;
+  }
+}

@@ -116,25 +116,24 @@ test.describe('page shell', () => {
     }
   });
 
-  test('the portrait slot is a decorative placeholder that requests no image', async ({ page }) => {
+  test('the portrait shows the photo with its alt text at 176 x 220 and no failed request', async ({ page }) => {
     const network = watchNetwork(page);
     await page.goto('/', { waitUntil: 'networkidle' });
 
-    const slot = page.locator('#about [data-placeholder]');
-    await expect(slot).toHaveCount(1);
-    await expect(slot).toHaveAttribute('aria-hidden', 'true');
-    await expect(slot).toContainText(portfolio.about.portrait.placeholderInitials);
-    await expect(slot).toBeVisible();
-    await expect(page.locator('#about img, #about picture')).toHaveCount(0);
+    await expect(page.locator('#about [data-placeholder]')).toHaveCount(0);
+    const photo = page.locator('#about').getByRole('img', { name: portfolio.about.portrait.alt, exact: true });
+    await expect(photo).toHaveCount(1);
+    await photo.scrollIntoViewIfNeeded();
+    await expect
+      .poll(() => photo.evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth > 0))
+      .toBe(true);
 
-    const box = await slot.boundingBox();
+    const box = await page.locator('#about .frame').boundingBox();
     expect(box?.width).toBeCloseTo(176, 0);
     expect(box?.height).toBeCloseTo(220, 0);
 
-    await page.locator('#about').scrollIntoViewIfNeeded();
     await page.waitForLoadState('networkidle');
     expect(network.failed).toEqual([]);
-    expect(network.requests.filter((url) => /\.(png|jpe?g|webp|avif|gif)(\?|$)/i.test(url))).toEqual([]);
   });
 
   test('the scene layer is a fixed, hidden backdrop that never takes focus or pointer events', async ({ page }) => {
@@ -236,7 +235,7 @@ test.describe('at 390 px', () => {
 
   test('the portrait slot sits at the top of About at 144 x 180', async ({ page }) => {
     await page.goto('/');
-    const box = await page.locator('#about [data-placeholder]').boundingBox();
+    const box = await page.locator('#about .frame').boundingBox();
     expect(box?.width).toBeCloseTo(144, 0);
     expect(box?.height).toBeCloseTo(180, 0);
   });

@@ -85,13 +85,14 @@ function sectionContent(page: Page): Record<string, Locator[]> {
       page.locator('#about').getByRole('heading', { level: 2, name: about.heading, exact: true }),
       ...about.paragraphs.map((paragraph) => inSection('about', paragraph)),
       ...about.stats.map((stat) => inSection('about', stat.label)),
-      page.locator('#about [data-placeholder]'),
+      page.locator('#about').getByRole('img', { name: about.portrait.alt, exact: true }),
     ],
     projects: [
       page.locator('#projects').getByRole('heading', { level: 2, name: projects.heading, exact: true }),
       ...featured.flatMap((project) => [
         page.locator('#projects').getByRole('heading', { level: 3, name: project.title, exact: true }),
         inSection('projects', project.pitch),
+        inSection('projects', project.description),
       ]),
     ],
     skills: [

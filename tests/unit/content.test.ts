@@ -42,6 +42,7 @@ describe('projects', () => {
     for (const project of items) {
       expect(project.title.trim(), project.repo).not.toBe('');
       expect(project.pitch.trim(), project.repo).not.toBe('');
+      expect(project.description.trim().length, project.repo).toBeGreaterThan(project.pitch.length / 2);
       expect(project.tags.length, project.repo).toBeGreaterThan(0);
       expect(project.url).toBe(`${githubProfile}/${project.repo}`);
       expect(new URL(String(project.url)).pathname.split('/')[1]).toBe('nunomarques97');
@@ -157,10 +158,10 @@ describe('copy', () => {
 });
 
 describe('placeholders', () => {
-  it('leaves exactly the CV file and the portrait photo as placeholders, each with a hint', () => {
-    const found = findPlaceholders(portfolio);
-    expect(found.map((item) => item.path).sort()).toEqual(['about.portrait.photo', 'contact.cv.file']);
-    for (const item of found) expect(item.hint.trim(), item.path).not.toBe('');
+  it('leaves no placeholders in the published content', () => {
+    expect(findPlaceholders(portfolio)).toEqual([]);
+    expect(portfolio.about.portrait.photo).toBe('src/assets/portrait/nuno-marques.png');
+    expect(portfolio.contact.cv.file).toBe('/nuno-marques-cv.pdf');
   });
 
   it('keeps the alt text next to the portrait photo', () => {
@@ -199,7 +200,7 @@ describe('placeholders', () => {
       });
     });
     expect(result.code).toBe(0);
-    expect(result.stdout).toContain('2 placeholders left in src/content/portfolio.ts');
+    expect(result.stdout).toContain('No placeholders left in src/content/portfolio.ts.');
     for (const item of findPlaceholders(portfolio)) {
       expect(result.stdout).toContain(`- ${item.path}`);
       expect(result.stdout).toContain(item.hint);

@@ -70,6 +70,7 @@ const baseProjects: Portfolio['projects'] = {
       repo: 'alpha',
       title: 'Alpha',
       pitch: 'First project.',
+      description: 'What the first project does.',
       tags: ['TypeScript', 'Astro'],
       url: 'https://example.com/alpha',
       featured: true,
@@ -78,6 +79,7 @@ const baseProjects: Portfolio['projects'] = {
       repo: 'beta',
       title: 'Beta',
       pitch: 'Second project.',
+      description: 'What the second project does.',
       tags: ['Rust'],
       url: 'https://example.com/beta',
       featured: true,
@@ -86,6 +88,7 @@ const baseProjects: Portfolio['projects'] = {
       repo: 'hidden',
       title: 'Hidden',
       pitch: 'Not featured.',
+      description: 'What the hidden project does.',
       tags: ['HTML'],
       url: 'https://example.com/hidden',
       featured: false,
@@ -161,6 +164,7 @@ describe('Projects', () => {
       expect(title && text(title).trim()).toBe(project.title);
       expect(article.attrs['aria-labelledby']).toBe(title?.attrs.id);
       expect(text(article)).toContain(project.pitch);
+      expect(text(article)).toContain(project.description);
       expect(byTag(article, 'ul')).toHaveLength(1);
       expect(byTag(article, 'li').map((tag) => text(tag).trim())).toEqual(project.tags);
 

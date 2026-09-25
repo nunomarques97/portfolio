@@ -19,6 +19,7 @@ const linkLabel = ui.projectLink(project.title);
   <h3 id={titleId} class="project-title">{project.title}</h3>
   <p class="project-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</p>
   <p class="project-pitch">{project.pitch}</p>
+  <p class="project-description">{project.description}</p>
   <ul class="project-tags">
     {project.tags.map((tag) => <li>{tag}</li>)}
   </ul>
@@ -84,8 +85,15 @@ const linkLabel = ui.projectLink(project.title);
   }
 
   .project-pitch {
-    margin: 0 0 14px;
+    margin: 0 0 10px;
     color: var(--text-body);
+    overflow-wrap: anywhere;
+  }
+
+  .project-description {
+    margin: 0 0 14px;
+    color: var(--text-muted);
+    font-size: var(--text-small);
     overflow-wrap: anywhere;
   }
 

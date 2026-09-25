@@ -82,6 +82,8 @@ export interface Project {
   readonly repo: string;
   readonly title: string;
   readonly pitch: string;
+  /** Two or three sentences on what the project does and how. */
+  readonly description: string;
   readonly tags: readonly string[];
   readonly url: Pending<string>;
   /** Featured projects are rendered, in array order. */
@@ -241,10 +243,7 @@ export const portfolio: Portfolio = {
       { value: '6', label: 'Public projects' },
     ],
     portrait: {
-      photo: placeholder(
-        'Add the photo as src/assets/portrait/nuno-marques.jpg (4:5, at least 704 × 880 px) and set this to that ' +
-          'path; its alt text is about.portrait.alt.',
-      ),
+      photo: 'src/assets/portrait/nuno-marques.png',
       alt: 'Portrait of Nuno Marques',
       caption: 'ID / NM-01',
       placeholderInitials: 'NM',
@@ -261,6 +260,10 @@ export const portfolio: Portfolio = {
         pitch:
           'Turns Claude Code into a small autonomous software team: a controller that plans, develops, runs checks ' +
           'and gets every task independently reviewed.',
+        description:
+          'A Node.js command-line orchestrator for work in an existing Git project. Each phase starts a fresh ' +
+          'Claude Code or Codex session, while a small controller owns task state, executed checks, retry ' +
+          'limits and recovery, and no task finishes without an independent review.',
         tags: ['JavaScript', 'Node.js', 'Zero dependencies'],
         url: `${githubProfile}/forja`,
         featured: true,
@@ -271,6 +274,11 @@ export const portfolio: Portfolio = {
         pitch:
           'Local-first crypto market radar: deterministic Kraken analysis with a local model as advisor. ' +
           'It never places orders.',
+        description:
+          'Watches public Kraken spot and perpetual markets and narrows them down through four deterministic ' +
+          'layers: universe, anomaly scores, market structure and order-book detail. Only then does a local ' +
+          'Ollama model give an advisory second opinion before a human is alerted. No credentials, paid APIs or ' +
+          'cloud inference.',
         tags: ['Python', 'Local LLM'],
         url: `${githubProfile}/crypto-radar`,
         featured: true,
@@ -279,6 +287,10 @@ export const portfolio: Portfolio = {
         repo: 'jarvis',
         title: 'Jarvis',
         pitch: 'Offline voice assistant that hands spoken commands to Claude Code sessions. No paid cloud.',
+        description:
+          'Listens for "hey jarvis", transcribes speech on the local GPU with faster-whisper and routes it ' +
+          'through a fixed allow-list: small local actions run directly and everything else goes to a Claude ' +
+          'Code session. It answers aloud with Piper, and no audio ever leaves the PC.',
         tags: ['Python', 'Speech', 'Offline'],
         url: `${githubProfile}/jarvis`,
         featured: true,
@@ -287,6 +299,10 @@ export const portfolio: Portfolio = {
         repo: 'velora-poker',
         title: 'Velora Poker',
         pitch: 'Local-only Windows desktop poker HUD.',
+        description:
+          'Watches the PokerStars hand-history folder, imports every new hand into SQLite and computes 18 ' +
+          'statistics per opponent. A transparent, click-through overlay follows each open table and shows them ' +
+          'on the seats, with no accounts, cloud or network calls.',
         tags: ['Rust', 'Tauri 2', 'React'],
         url: `${githubProfile}/velora-poker`,
         featured: true,
@@ -297,6 +313,10 @@ export const portfolio: Portfolio = {
         pitch:
           'Windows tray launcher for filename, full-text and local semantic search. ' +
           'No cloud AI, accounts or telemetry.',
+        description:
+          'A Windows tray launcher, opened with Ctrl + Space, that searches the folders you choose by filename, ' +
+          'by full text with SQLite FTS5 and by meaning with local Ollama embeddings. A native WPF app on .NET ' +
+          '10 that never scans drives on its own.',
         tags: ['C#', 'WPF', '.NET 10', 'SQLite FTS5', 'Ollama'],
         url: `${githubProfile}/seekai`,
         featured: true,
@@ -307,6 +327,10 @@ export const portfolio: Portfolio = {
         pitch:
           'Quantitative crypto research system: pre-registered studies, costs always included and walk-forward ' +
           'validation only. Places no real orders.',
+        description:
+          'Asks whether any family of crypto strategies keeps a robust edge after costs, across Binance and ' +
+          'Kraken. Every study is pre-registered, costs are always included, only walk-forward results count, ' +
+          'and live trading stays locked behind explicit criteria.',
         tags: ['Python', 'Research'],
         url: `${githubProfile}/sextant`,
         featured: true,
@@ -315,6 +339,8 @@ export const portfolio: Portfolio = {
         repo: 'gearlift-legal',
         title: 'Gearlift Legal',
         pitch: 'Legal pages for the Gearlift app.',
+        description:
+          'Static HTML pages with the public privacy policy and terms of use of the Gearlift app.',
         tags: ['HTML'],
         url: `${githubProfile}/gearlift-legal`,
         featured: false,
@@ -401,10 +427,7 @@ export const portfolio: Portfolio = {
     ],
     cv: {
       label: 'Download CV',
-      file: placeholder(
-        'Add the CV as public/nuno-marques-cv.pdf and set this to "/nuno-marques-cv.pdf". ' +
-          'Until then the row renders as non-interactive "Coming soon" text.',
-      ),
+      file: '/nuno-marques-cv.pdf',
     },
   },
   footer: {

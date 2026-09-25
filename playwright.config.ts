@@ -10,6 +10,9 @@ export default defineConfig({
   testDir: 'tests/e2e',
   outputDir: 'test-results/e2e',
   fullyParallel: true,
+  // Every page renders a continuous WebGL scene on the shared GPU. With one browser per core the renderers starve
+  // each other and the choreography tests, which wait for the camera to settle, time out.
+  workers: 4,
   forbidOnly: true,
   retries: 0,
   reporter: [['list']],

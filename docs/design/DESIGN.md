@@ -144,7 +144,7 @@ HUD is hidden. Nothing scales the desktop poster down: the composition changes f
 - **Stats.** A three-column grid with 1 px hairline separators and radius 14 px. Value: Space Grotesk 700, 30 px
   (24 px on mobile). Label: micro mono uppercase, muted.
 - **Project card.** A panel with padding 24/24/20. Index "01" in micro mono, `--text-accent`; title `--text-h3`;
-  description `--text-body`; tags; then the link "View <name> on GitHub ↗" (label mono, `--text-signal`, underlined
+  one-line pitch `--text-body`; a two- or three-sentence description of what the project does, `--text-muted` at `--text-small`; tags; then the link "View <name> on GitHub ↗" (label mono, `--text-signal`, underlined
   on hover and focus). External links open in a new tab with `rel="noopener noreferrer"` and visually hidden
   "(opens in a new tab)" text. The card being read (desktop) gets `--border-active`, a soft cyan glow, and moves 8 px
   right over `--duration-emphasis`. The scrim contrast pairs assume this shift; a larger one needs a matching `@pair`.

@@ -15,7 +15,8 @@
     "typecheck": "astro check",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "capture": "node scripts/capture.mjs"
+    "capture": "node scripts/capture.mjs",
+    "placeholders": "node scripts/list-placeholders.mjs"
   },
   "dependencies": {
     "@fontsource/jetbrains-mono": "^5.3.0",

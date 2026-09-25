@@ -51,7 +51,7 @@ const linkLabel = ui.projectLink(project.title);
       transform var(--duration-emphasis) var(--ease-out);
   }
 
-  /* Set by the scene choreography on the card being read (desktop only). */
+  /* Set by src/scene/scroll-progress.ts on the card being read; only desktop moves it. */
   .project-card[data-active='true'] {
     border-color: var(--border-active);
     box-shadow:

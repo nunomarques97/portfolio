@@ -32,6 +32,7 @@ npm run lint        # ESLint for .ts, .mjs and .astro files
 npm run typecheck   # astro check (TypeScript strict)
 npm test            # unit tests (Vitest)
 npm run test:e2e    # browser tests (Playwright) against a fresh production build on a free port
+npm run fps         # frame rate while scrolling, in a headed browser with the GPU (1440 and 390 tiers)
 ```
 
 Every script also runs without npm or a shell, which is useful on Windows and in automation:

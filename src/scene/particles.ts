@@ -14,11 +14,10 @@ import {
   WebGLRenderer,
 } from 'three';
 import type { Tier } from './capabilities';
-import { buildFormations, SECTION_STATES, type SectionState, type Vec3 } from './formations';
+import { createChoreography, type Choreography } from './choreography';
+import { buildFormations, SECTION_STATES, type SectionState } from './formations';
 import { fragmentShader, vertexShader } from './shaders';
 
-/** Damping rate of the morph, camera and colour glides: 1 - e^(-rate * dt) per frame. */
-const DAMPING = 3.2;
 /** On desktop the field sits to the right of the content column. */
 const DESKTOP_OFFSET_X = 2;
 const FALLBACK_COLOR = '#22d3ee';
@@ -34,25 +33,23 @@ export interface ParticleSceneOptions {
 
 export interface ParticleScene {
   readonly particles: number;
-  /** Sets the section whose keyframe the field moves toward. */
-  setSection(index: number): void;
+  /** Scroll choreography that drives the pose; the loader feeds it scroll progress, the pointer and the mode. */
+  readonly choreography: Choreography;
   resize(width: number, height: number, narrow: boolean): void;
-  /** Advances the glides and the clock by dt seconds, then renders. */
+  /** Advances the choreography and the clock by dt seconds, then renders. */
   frame(dt: number): void;
-  /** Renders the current section's keyframe as a still: no glide and a frozen clock (reduced motion). */
-  renderStill(): void;
+  /**
+   * Renders section `index` as a still with project cluster `cluster` highlighted (-1 for none): no glide and a
+   * frozen clock (reduced motion).
+   */
+  renderStill(index: number, cluster: number): void;
   dispose(): void;
 }
 
 interface Keyframe {
-  readonly morph: number;
-  readonly camera: Vector3;
-  readonly target: Vector3;
   readonly colorA: Color;
   readonly colorB: Color;
 }
-
-const vector = ([x, y, z]: Vec3) => new Vector3(x, y, z);
 
 export function createParticleScene(options: ParticleSceneOptions): ParticleScene {
   const { canvas, context, tier, pixelRatio, cssVariable } = options;
@@ -81,16 +78,14 @@ export function createParticleScene(options: ParticleSceneOptions): ParticleScen
 
   const color = (name: string) => new Color(cssVariable(name).trim() || FALLBACK_COLOR);
   const keyframes: Keyframe[] = SECTION_STATES.map((state: SectionState) => ({
-    morph: state.morph,
-    camera: vector(state.camera),
-    target: vector(state.target),
     colorA: color(state.colors[0]),
     colorB: color(state.colors[1]),
   }));
   const first = keyframes[0] as Keyframe;
+  const choreography = createChoreography(SECTION_STATES);
 
   const uniforms = {
-    uMorph: { value: first.morph },
+    uMorph: { value: 0 },
     uTime: { value: 0 },
     uSize: { value: tier.pointSize },
     uPixelRatio: { value: pixelRatio },
@@ -118,21 +113,27 @@ export function createParticleScene(options: ParticleSceneOptions): ParticleScen
   scene.add(group);
 
   const camera = new PerspectiveCamera(55, 1, 0.1, 100);
-  const cameraTarget = first.target.clone();
-  camera.position.copy(first.camera);
-  let goal = first;
+  const cameraTarget = new Vector3();
 
+  /** Applies the choreography's pose to the uniforms and the camera, then draws. */
   const render = () => {
+    const { pose } = choreography;
+    const from = keyframes[pose.from] ?? first;
+    const to = keyframes[pose.to] ?? first;
+    uniforms.uMorph.value = pose.morph;
+    uniforms.uColorA.value.copy(from.colorA).lerp(to.colorA, pose.blend);
+    uniforms.uColorB.value.copy(from.colorB).lerp(to.colorB, pose.blend);
+    uniforms.uActive.value = pose.cluster;
+    uniforms.uActiveAmount.value = pose.highlight;
+    camera.position.set(...pose.camera);
+    cameraTarget.set(...pose.target);
     camera.lookAt(cameraTarget);
     renderer.render(scene, camera);
   };
 
   return {
     particles: formations.count,
-
-    setSection(index) {
-      goal = keyframes[Math.max(0, Math.min(keyframes.length - 1, index))] ?? first;
-    },
+    choreography,
 
     resize(width, height, narrow) {
       renderer.setSize(width, height, false);
@@ -142,23 +143,14 @@ export function createParticleScene(options: ParticleSceneOptions): ParticleScen
     },
 
     frame(dt) {
-      const ease = 1 - Math.exp(-DAMPING * dt);
-      uniforms.uMorph.value += (goal.morph - uniforms.uMorph.value) * ease;
+      choreography.step(dt);
       uniforms.uTime.value += dt;
-      uniforms.uColorA.value.lerp(goal.colorA, ease);
-      uniforms.uColorB.value.lerp(goal.colorB, ease);
-      camera.position.lerp(goal.camera, ease);
-      cameraTarget.lerp(goal.target, ease);
       render();
     },
 
-    renderStill() {
-      uniforms.uMorph.value = goal.morph;
+    renderStill(index, cluster) {
+      choreography.still(index, cluster);
       uniforms.uTime.value = 0;
-      uniforms.uColorA.value.copy(goal.colorA);
-      uniforms.uColorB.value.copy(goal.colorB);
-      camera.position.copy(goal.camera);
-      cameraTarget.copy(goal.target);
       render();
     },
 

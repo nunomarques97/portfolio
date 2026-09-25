@@ -44,7 +44,10 @@ function modeName({ motion, webgl }) {
   return parts.length ? parts.join('-') : 'default';
 }
 
-/** Waits for fonts, for the scene state (html[data-scene]) to settle when present, then two frames. */
+/**
+ * Waits for fonts, for the scene state (html[data-scene]) to settle when present and for the scroll choreography to
+ * finish gliding to the section in view (reported by the scene's test probe), then two frames.
+ */
 async function settle(page, ms) {
   await page.evaluate(() => document.fonts.ready.then(() => undefined));
   await page
@@ -58,6 +61,14 @@ async function settle(page, ms) {
     )
     .catch(() => {
       throw new Error('the scene did not reach a settled state (html[data-scene]) within 15 s');
+    });
+  await page
+    .waitForFunction(() => {
+      const probe = window.__PORTFOLIO_SCENE_PROBE__;
+      return document.documentElement.dataset.scene !== 'running' || probe?.settled === true;
+    }, null, { timeout: 10_000 })
+    .catch(() => {
+      throw new Error('the scene did not finish gliding to the section in view within 10 s');
     });
   await page.evaluate(
     () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve(undefined)))),
@@ -84,6 +95,10 @@ const webglAvailable = (page) =>
 async function captureViewport(browser, url, viewport, options, outDir, manifest, failures) {
   const context = await browser.newContext({ viewport, reducedMotion: options.motion });
   try {
+    // Opts into the scene's test probe, which reports when the choreography has settled.
+    await context.addInitScript(() => {
+      window.__PORTFOLIO_SCENE_PROBE__ = { frames: 0, stills: 0 };
+    });
     const page = await context.newPage();
     const pageErrors = [];
     page.on('pageerror', (error) => pageErrors.push(error.message));

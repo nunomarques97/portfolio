@@ -39,9 +39,12 @@ const firstSection = sections[0];
       <div class="scene-topfade"></div>
     </div>
 
+    <!-- Page scroll progress; scaled by src/scene/scroll-progress.ts, so it stays empty without scripts. -->
+    <div class="scroll-progress" aria-hidden="true" data-scroll-progress></div>
+
     <div class="hud" aria-hidden="true" inert>
       <div class="hud-status"><span class="hud-dot"></span><span>{ui.hudTitle}</span></div>
-      <div class="hud-section">
+      <div class="hud-section" data-hud-states={JSON.stringify(sections.map((section) => section.hudState))}>
         <div>{ui.hudSection} <b data-hud-index>{pad(1)}</b> / {pad(sections.length)}</div>
         <div data-hud-state>{firstSection?.hudState}</div>
       </div>
@@ -195,6 +198,19 @@ const firstSection = sections[0];
     bottom: auto;
     height: 88px;
     background: linear-gradient(var(--color-bg) 56px, rgb(4 6 13 / 0) 88px);
+  }
+
+  .scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-cyan), var(--accent-violet), var(--accent-magenta));
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    pointer-events: none;
   }
 
   .hud {

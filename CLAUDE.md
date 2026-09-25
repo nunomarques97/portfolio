@@ -2,7 +2,7 @@
 
 Nuno Marques's personal portfolio.
 
-Status: **empty scaffold, private repository.** Product, stack and design are not decided yet; the Sponsor states the goal in the first session. Do not pick a stack, write UI or start a FORJA run before that. The repository will be made public later, so everything committed must be safe to publish.
+Status: **public repository, deployed to GitHub Pages** at https://nunomarques97.github.io/portfolio/ on every push to `main`. Stack: Astro static site with a three.js scene; the design contract is `docs/design/DESIGN.md`. Everything committed is public.
 
 ## Rules
 
@@ -13,8 +13,8 @@ Status: **empty scaffold, private repository.** Product, stack and design are no
 5. **No internal process material in the product.** Chat logs, transcripts, notes to or about the Sponsor, run reports and agent chatter live only in `docs/forja/` and `.claude/`, never in `README.md`, product docs, code comments or anywhere else.
 6. **Commit messages read like a senior developer wrote them**: English, imperative mood, subject of 72 characters or less, optional body saying why; no task IDs, `Forja`, `checkpoint`, AI/agent wording or emoji. Author: the identity configured in this repo (GitHub noreply address); do not change it.
 7. **UI work follows `docs/design/DESIGN.md`** once it exists (created by the `ui-kickoff` process).
-8. **Publishing is a Sponsor decision.** Pushing to the private `origin` is normal work. Making the repository public, deploying, publishing packages or anything that spends money goes to the Sponsor.
-9. **No LICENSE yet.** The Sponsor picks one before the repository goes public.
+8. **A push to `main` deploys the public site.** Keep `main` releasable. Changing the hosting, adding a paid service or a custom domain goes to the Sponsor.
+9. **License: MIT for the code** (`LICENSE`). Personal content and photos are not covered; keep that note in `README.md`.
 
 <!-- forja-core:begin -->
 ## FORJA core

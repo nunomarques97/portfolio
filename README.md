@@ -3,6 +3,9 @@
 Personal portfolio of Nuno Marques, Senior Full Stack Developer. A single-page static site built with
 [Astro](https://astro.build) and TypeScript.
 
+Live at <https://nunomarques97.github.io/portfolio/>. Every push to `main` is deployed by
+`.github/workflows/pages.yml`.
+
 ## Requirements
 
 - Node.js 22.13 or later (see `.nvmrc`; the supported range is in `package.json` under `engines`).
@@ -106,3 +109,8 @@ git config core.hooksPath .githooks
 ```
 
 `node scripts/guard-keys.mjs --all` scans the whole working tree.
+
+## License
+
+The source code is released under the [MIT License](LICENSE). The written content and images describing Nuno
+Marques (text in `src/content/`, photos in `src/assets/portrait/`) are not covered by it and may not be reused.

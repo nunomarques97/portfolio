@@ -237,7 +237,7 @@ export const portfolio: Portfolio = {
       'tools and apps.',
     primaryAction: { label: 'View projects', href: '#projects' },
     secondaryAction: { label: 'Get in touch', href: '#contact' },
-    availability: 'Open to remote work and relocation across Europe',
+    availability: 'Open to remote or hybrid work, and to relocation across Europe',
   },
   about: {
     eyebrow: 'About',
@@ -492,7 +492,7 @@ export const portfolio: Portfolio = {
   contact: {
     eyebrow: 'Contact',
     heading: "Let's talk.",
-    lede: 'Open to full stack and applied AI roles, remote or with relocation across Europe.',
+    lede: 'Open to full stack and applied AI roles: remote, hybrid or with relocation across Europe.',
     email,
     links: [
       { kind: 'email', label: 'Email', display: email, href: `mailto:${email}`, external: false },

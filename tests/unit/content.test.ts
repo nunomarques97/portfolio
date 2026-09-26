@@ -66,11 +66,11 @@ describe('projects', () => {
     for (const project of hidden) expect(project.description, project.repo).toMatch(/private/i);
   });
 
-  it('adds the Tollwise demo and the Gearlift store listing after the repository', () => {
+  it('adds the Tollwise demo, the Gearlift store listing and the Repcastr website after the repository', () => {
     const hrefs = (repo: string) => projectHrefs(items.find((project) => project.repo === repo) as Project);
     expect(hrefs('tollwise')).toEqual([`${githubProfile}/tollwise`, 'https://nunomarques97.github.io/tollwise/demo/']);
     expect(hrefs('gearlift')).toEqual(['https://play.google.com/store/apps/details?id=com.gearlift.app']);
-    expect(hrefs('automacoes-n8n')).toEqual([]);
+    expect(hrefs('automacoes-n8n')).toEqual(['https://repcastr.com']);
   });
 
   it('links the full GitHub profile after the featured projects', () => {

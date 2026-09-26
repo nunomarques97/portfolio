@@ -251,7 +251,7 @@ export const portfolio: Portfolio = {
       'I also build the AI tools my team uses. I built a RAG system over our internal documentation, connected to ' +
         'Jira cards and release notes, and wrote AI skills that colleagues use every day. I review code and mentor ' +
         'the junior developers and interns who join the team.',
-      'In my own time I build my own software. FORJA runs Claude Code as a small software team: it plans the work, ' +
+      'In my own time I build my own software. FORJA runs an LLM coding agent as a small software team: it plans the work, ' +
         'writes the code, runs the checks and has every task reviewed separately. I use it to build my other ' +
         'projects, including Tollwise, an Android workout app, WhatsApp automations for small businesses and ' +
         'Windows tools. Most of them run on your own machine, with no account and no telemetry.',
@@ -277,11 +277,11 @@ export const portfolio: Portfolio = {
         repo: 'forja',
         title: 'FORJA',
         pitch:
-          'Runs Claude Code as a small software team. It plans, writes the code, runs the checks and gets every ' +
+          'Runs an LLM coding agent as a small software team. It plans, writes the code, runs the checks and gets every ' +
           'task independently reviewed.',
         description:
           'A Node.js command-line orchestrator for work in an existing Git project. Each phase starts a fresh ' +
-          'Claude Code or Codex session, while a small controller owns task state, executed checks, retry ' +
+          'coding-agent session, while a small controller owns task state, executed checks, retry ' +
           'limits and recovery, and no task finishes without an independent review.',
         tags: ['JavaScript', 'Node.js', 'Zero dependencies'],
         url: `${githubProfile}/forja`,
@@ -333,6 +333,7 @@ export const portfolio: Portfolio = {
           'and one clients table drives every workflow. The repository is private.',
         tags: ['n8n', 'JavaScript', 'WhatsApp API', 'Astro'],
         url: null,
+        links: [{ label: 'Website', href: 'https://repcastr.com' }],
         featured: true,
       },
       {
@@ -353,11 +354,11 @@ export const portfolio: Portfolio = {
       {
         repo: 'jarvis',
         title: 'Jarvis',
-        pitch: 'Offline voice assistant that hands spoken commands to Claude Code sessions. It uses no paid cloud service.',
+        pitch: 'Offline voice assistant that turns spoken commands into tasks for an AI coding agent. It uses no paid cloud service.',
         description:
           'Listens for "hey jarvis", transcribes speech on the local GPU with faster-whisper and routes it ' +
-          'through a fixed allow-list: small local actions run directly and everything else goes to a Claude ' +
-          'Code session. It answers aloud with Piper, and no audio ever leaves the PC.',
+          'through a fixed allow-list: small local actions run directly and everything else goes to an AI ' +
+          'coding agent. It answers aloud with Piper, and no audio ever leaves the PC.',
         tags: ['Python', 'Speech', 'Offline'],
         url: `${githubProfile}/jarvis`,
         featured: true,
@@ -441,7 +442,7 @@ export const portfolio: Portfolio = {
         title: 'Backend',
         items: ['.NET / C#', 'REST APIs', 'SQL Server', 'MongoDB', 'Node.js', 'Firebase', 'Python', 'Rust'],
       },
-      { title: 'Applied AI', items: ['RAG', 'AI agents', 'Claude Code', 'LLM APIs', 'Ollama', 'n8n', 'Jira API'] },
+      { title: 'Applied AI', items: ['RAG', 'AI agents', 'AI-assisted development', 'LLM APIs', 'Ollama', 'n8n', 'Jira API'] },
       {
         title: 'Quality & delivery',
         items: ['xUnit', 'NUnit', 'Cypress', 'Jenkins', 'XL Release / Deploy', 'Docker', 'Git'],

@@ -4,6 +4,7 @@ import { portfolio } from '../../src/content/portfolio';
 import {
   buildFormations,
   CLUSTER_COUNT,
+  HELIX_STEP,
   clusterCenter,
   CORE,
   createRandom,
@@ -84,7 +85,7 @@ describe('formations', () => {
   it('places one cluster per featured project on the descending helix', () => {
     expect(CLUSTER_COUNT).toBe(portfolio.projects.items.filter((project) => project.featured).length);
     expect(clusterCenter(0)).toEqual([0, 2.6, 1.1]);
-    expect(clusterCenter(5)[1]).toBeCloseTo(2.6 - 1.05 * 5);
+    expect(clusterCenter(5)[1]).toBeCloseTo(2.6 - HELIX_STEP * 5);
     for (let k = 0; k < CLUSTER_COUNT; k += 1) {
       const members = indices.filter((i) => formations.cluster[i] === k);
       expect(members.length).toBeGreaterThan(COUNT / CLUSTER_COUNT - 2);

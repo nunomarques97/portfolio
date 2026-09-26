@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { CLUSTER_COUNT } from '../../src/scene/formations';
 
 const desktop = { width: 1440, height: 900 };
 const mobile = { width: 390, height: 844 };
@@ -313,8 +314,8 @@ test.describe('choreography: default', () => {
     const errors = await open(page);
     expect(await probe(page)).toMatchObject({ retarget: true });
     const cards = await page.locator('main [data-cluster]').count();
-    expect(cards).toBe(6);
-    for (const cluster of [0, 3, 5, 1]) {
+    expect(cards).toBe(CLUSTER_COUNT);
+    for (const cluster of [0, 3, CLUSTER_COUNT - 1, 1]) {
       await centreCard(page, cluster);
       await expect.poll(async () => (await probe(page)).cluster).toBe(cluster);
       expect((await inView(page)).cluster).toBe(cluster);

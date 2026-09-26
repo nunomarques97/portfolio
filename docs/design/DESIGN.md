@@ -7,7 +7,7 @@ live in `src/styles/theme.css`, and `tests/unit/theme.test.ts` enforces their co
 
 **Audience question.** A recruiter or hiring manager has a minute and asks: *who is this, what does he build, is he
 senior enough, and how do I reach him?* The page answers in that order: name and role, a short account of his work,
-six projects, the stack, the career timeline, then contact.
+ten projects, the stack, the career timeline, then contact.
 
 **Organizing rule.** Every section is a state of one system. A single particle field starts as a *core coming
 online*, spreads into a *constellation* with one cluster per project, settles into a *lattice* for the stack, flows
@@ -148,7 +148,9 @@ HUD is hidden. Nothing scales the desktop poster down: the composition changes f
   on hover and focus). External links open in a new tab with `rel="noopener noreferrer"` and visually hidden
   "(opens in a new tab)" text. The card being read (desktop) gets `--border-active`, a soft cyan glow, and moves 8 px
   right over `--duration-emphasis`. The scrim contrast pairs assume this shift; a larger one needs a matching `@pair`.
-  Only the six featured projects are rendered, in order: FORJA, Crypto Radar, Jarvis, Velora Poker, SeekAI, Sextant.
+  Only the ten featured projects are rendered, in order: FORJA, Tollwise, Gearlift, Repcastr, Crypto Radar, Jarvis,
+  Statehop, Velora Poker, SeekAI, Sextant. After the description a card lists its links: the GitHub repository, or a
+  muted "Private repository" note when the code is private, then any demo or store link.
 - **Stack tags (in cards).** Mono 11 px pills, hairline border, muted text. They are not interactive, so the hairline
   is decoration.
 - **Skill chips.** Four groups (Frontend, Backend, Applied AI, Quality & delivery) in a 2 × 2 grid of panels (one
@@ -216,7 +218,7 @@ smooth-scroll library, no pinning, no scroll hijacking. `scroll-behavior: smooth
 ## 3D scene concept
 
 One `THREE.Points` draw call. Each particle stores its position in all four formations (core, constellation, lattice,
-stream/beacon) as vertex attributes, plus a random seed, a cluster index (0–5) and a beacon flag. The vertex shader
+stream/beacon) as vertex attributes, plus a random seed, a cluster index (0–9) and a beacon flag. The vertex shader
 blends between formations from a single `uMorph` uniform (0–3), with a per-particle stagger from its seed and an
 outward turbulence mid-morph. Soft round sprites use additive blending and no depth writes. The size attenuates with
 depth and scales with the capped device pixel ratio. Two uniform colours per section are blended per particle by its
@@ -226,9 +228,9 @@ Formations (world units):
 
 - **Core**: 72% on a sphere shell of radius 1.8, 12% in a dense inner core (radius ≤ 0.55), 16% on a ring of radius
   2.7 flattened to 0.22 and tilted 0.45 rad.
-- **Constellation**: six clusters on a descending helix, with centre k at (sin(1.15k)·1.5, 2.6 − 1.05k,
-  cos(1.15k)·1.1) and Gaussian spread 0.32 (20% of particles at 0.57). 15% of each cluster's particles form a faint
-  link to the next cluster.
+- **Constellation**: one cluster per featured project (ten) on a descending helix, with centre k at
+  (sin(1.15k)·1.5, 2.6 − 0.7k, cos(1.15k)·1.1) and Gaussian spread 0.32 (20% of particles at 0.57). 15% of each
+  cluster's particles form a faint link to the next cluster.
 - **Lattice**: three parallel planes at z = −1.1, 0 and 1.1, each a grid of lines at 0.5 spacing over ±2.5.
 - **Stream + beacon**: a three-strand spiral running from x = −5 toward x = 2.6, narrowing from radius 1.7. 14% of
   the particles form the beacon, a tight sphere (σ 0.16) at (2.6, 0, 0).
@@ -242,7 +244,7 @@ centre. On desktop the scene group is offset +2 on x (scene to the right of the 
 | --- | --- | --- | --- | --- | --- |
 | Hero | Core online | Core (0), spinning | (0, 0, 7.2) → (0, 0, 0) | `#22d3ee` / `#a78bfa` | Eyebrow, gradient name, lede, two CTAs, availability line; column left, core right |
 | About | Signal acquired | Core (0), closer | (3.2, 1.4, 5.4) → (0, 0, 0) | `#38bdf8` / `#818cf8` | Portrait + heading row, three-paragraph panel, stats |
-| Projects | Constellation | Constellation (1) | (3.6, 0.6, 7.4) → (0, 0.2, 0); on desktop the target moves 80% toward the active cluster and the camera's y follows it | `#22d3ee` / `#e0f2fe` | Six cards stacked in the column. The card crossing the viewport centre (a ±5% band) is active: its cluster is 1.5× larger and 30% whiter, the others dim by 45% |
+| Projects | Constellation | Constellation (1) | (3.6, 0.6, 7.4) → (0, 0.2, 0); on desktop the target moves 80% toward the active cluster and the camera's y follows it | `#22d3ee` / `#e0f2fe` | Ten cards stacked in the column. The card crossing the viewport centre (a ±5% band) is active: its cluster is 1.5× larger and 30% whiter, the others dim by 45% |
 | Skills | Lattice | Lattice (2) | (−3.6, 3.2, 5.6) → (0, 0, 0) | `#a78bfa` / `#f472b6` | 2 × 2 skill panels |
 | Experience | Signal stream | Stream (3) | (−4.6, 1.2, 4.8) → (−1, 0, 0) | `#22d3ee` / `#a78bfa` | Timeline: current role, three earlier roles, then the degree |
 | Contact | Beacon | Stream + lit beacon (3) | (4.4, 0.5, 2.6) → (2.6, 0, 0), flying to the beacon | `#22d3ee` / `#fbbf24` | Large heading, lede, email / LinkedIn / GitHub rows, CV placeholder |

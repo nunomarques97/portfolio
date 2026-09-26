@@ -1,7 +1,14 @@
 import { execFile } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { findPlaceholders, isPlaceholder, placeholder, portfolio } from '../../src/content/portfolio';
+import {
+  findPlaceholders,
+  isPlaceholder,
+  placeholder,
+  portfolio,
+  projectHrefs,
+  type Project,
+} from '../../src/content/portfolio';
 
 const githubProfile = 'https://github.com/nunomarques97';
 const email = 'nuno.d.o.marques1997@gmail.com';
@@ -21,11 +28,15 @@ const allStrings = strings(portfolio);
 describe('projects', () => {
   const items = portfolio.projects.items;
 
-  it('features six projects in the stated order', () => {
+  it('features ten projects in the stated order', () => {
     expect(items.filter((project) => project.featured).map((project) => project.repo)).toEqual([
       'forja',
+      'tollwise',
+      'gearlift',
+      'automacoes-n8n',
       'crypto-radar',
       'jarvis',
+      'statehop',
       'velora-poker',
       'seekai',
       'sextant',
@@ -37,15 +48,29 @@ describe('projects', () => {
     expect(gearlift).toMatchObject({ featured: false, pitch: 'Legal pages for the Gearlift app.', tags: ['HTML'] });
   });
 
-  it('gives every project a title, pitch, tags and its own repository URL', () => {
+  it('gives every project a title, pitch, tags and its own repository URL unless the repository is private', () => {
     for (const project of items) {
       expect(project.title.trim(), project.repo).not.toBe('');
       expect(project.pitch.trim(), project.repo).not.toBe('');
       expect(project.description.trim().length, project.repo).toBeGreaterThan(project.pitch.length / 2);
       expect(project.tags.length, project.repo).toBeGreaterThan(0);
+      if (project.url === null) continue;
       expect(project.url).toBe(`${githubProfile}/${project.repo}`);
       expect(new URL(String(project.url)).pathname.split('/')[1]).toBe('nunomarques97');
     }
+  });
+
+  it('marks only the private repositories as private and gives each an explanation', () => {
+    const hidden = items.filter((project) => project.url === null);
+    expect(hidden.map((project) => project.repo)).toEqual(['gearlift', 'automacoes-n8n']);
+    for (const project of hidden) expect(project.description, project.repo).toMatch(/private/i);
+  });
+
+  it('adds the Tollwise demo and the Gearlift store listing after the repository', () => {
+    const hrefs = (repo: string) => projectHrefs(items.find((project) => project.repo === repo) as Project);
+    expect(hrefs('tollwise')).toEqual([`${githubProfile}/tollwise`, 'https://nunomarques97.github.io/tollwise/demo/']);
+    expect(hrefs('gearlift')).toEqual(['https://play.google.com/store/apps/details?id=com.gearlift.app']);
+    expect(hrefs('automacoes-n8n')).toEqual([]);
   });
 
   it('links the full GitHub profile after the featured projects', () => {

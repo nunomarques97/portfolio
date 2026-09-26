@@ -1,13 +1,14 @@
 ---
 // One featured project. `index` is its position among the featured projects: it sets the "01" label and the
-// scene cluster the card maps to. A placeholder URL renders as non-interactive text instead of a link.
+// scene cluster the card maps to. A placeholder URL renders as non-interactive text instead of a link, and a
+// private repository as a plain note, followed by any other links such as a demo or a store listing.
 import { isPlaceholder, type Portfolio, type Project } from '../content/portfolio';
 import Placeholder from './Placeholder.astro';
 
 interface Props {
   project: Project;
   index: number;
-  ui: Pick<Portfolio['ui'], 'projectLink' | 'opensInNewTab' | 'comingSoon'>;
+  ui: Pick<Portfolio['ui'], 'projectLink' | 'privateRepository' | 'opensInNewTab' | 'comingSoon'>;
 }
 
 const { project, index, ui } = Astro.props;
@@ -23,20 +24,33 @@ const linkLabel = ui.projectLink(project.title);
   <ul class="project-tags">
     {project.tags.map((tag) => <li>{tag}</li>)}
   </ul>
-  {
-    isPlaceholder(project.url) ? (
-      <Placeholder class="project-link project-link-placeholder">
-        {linkLabel}
-        <span class="placeholder-note">{ui.comingSoon}</span>
-      </Placeholder>
-    ) : (
-      <a class="project-link" href={project.url} target="_blank" rel="noopener noreferrer">
-        {linkLabel}
-        <span aria-hidden="true"> ↗</span>
-        <span class="visually-hidden"> {ui.opensInNewTab}</span>
-      </a>
-    )
-  }
+  <div class="project-links">
+    {
+      project.url === null ? (
+        <span class="project-link project-private">{ui.privateRepository}</span>
+      ) : isPlaceholder(project.url) ? (
+        <Placeholder class="project-link project-link-placeholder">
+          {linkLabel}
+          <span class="placeholder-note">{ui.comingSoon}</span>
+        </Placeholder>
+      ) : (
+        <a class="project-link" href={project.url} target="_blank" rel="noopener noreferrer">
+          {linkLabel}
+          <span aria-hidden="true"> ↗</span>
+          <span class="visually-hidden"> {ui.opensInNewTab}</span>
+        </a>
+      )
+    }
+    {
+      project.links?.map((link) => (
+        <a class="project-link" href={link.href} target="_blank" rel="noopener noreferrer">
+          {link.label}
+          <span aria-hidden="true"> ↗</span>
+          <span class="visually-hidden"> {ui.opensInNewTab}</span>
+        </a>
+      ))
+    }
+  </div>
 </article>
 
 <style>
@@ -118,8 +132,14 @@ const linkLabel = ui.projectLink(project.title);
     overflow-wrap: anywhere;
   }
 
+  .project-links {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: var(--space-5);
+    align-items: baseline;
+  }
+
   .project-link {
-    align-self: flex-start;
     max-width: 100%;
     padding: 6px 0;
     font-family: var(--font-mono);
@@ -139,6 +159,10 @@ const linkLabel = ui.projectLink(project.title);
   a.project-link:focus-visible {
     text-decoration: underline;
     text-underline-offset: 4px;
+  }
+
+  .project-private {
+    color: var(--text-muted);
   }
 
   .project-link-placeholder {

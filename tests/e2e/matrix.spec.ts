@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Browser, type Locator, type Page } from '@playwright/test';
-import { isPlaceholder, portfolio } from '../../src/content/portfolio';
+import { isPlaceholder, portfolio, projectHrefs } from '../../src/content/portfolio';
 
 // Integrated check of every rendering mode at both reference widths: the content layer must be complete, readable,
 // accessible and self-contained whatever the scene does (running, static, unavailable or never started).
@@ -136,7 +136,7 @@ async function checkContent(page: Page, mode: Mode) {
     for (const item of content[id] ?? []) {
       await expect(item, id).toBeVisible();
       // Content reveals as it scrolls into view, so each item is brought into view and given time to finish.
-      await item.scrollIntoViewIfNeeded();
+      await item.evaluate((element) => element.scrollIntoView({ block: 'center', behavior: 'instant' }));
       await expect.poll(() => paintedOpacity(item), { message: `${id}: painted opacity` }).toBeGreaterThan(0.95);
     }
     expect(await horizontalOverflow(page), `${id}: horizontal overflow`).toBe(0);
@@ -281,7 +281,7 @@ async function keyboardWalk(page: Page) {
 const linkStops = [
   `hero ${hero.primaryAction.href}`,
   `hero ${hero.secondaryAction.href}`,
-  ...featured.flatMap((project) => (isPlaceholder(project.url) ? [] : [`projects ${project.url}`])),
+  ...featured.flatMap((project) => projectHrefs(project).map((href) => `projects ${href}`)),
   ...(isPlaceholder(projects.profileLink.href) ? [] : [`projects ${projects.profileLink.href}`]),
   ...contact.links.flatMap((link) => (isPlaceholder(link.href) ? [] : [`contact ${link.href}`])),
   ...(isPlaceholder(contact.cv.file) ? [] : [`contact ${contact.cv.file}`]),

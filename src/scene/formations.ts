@@ -4,7 +4,7 @@
 export type Vec3 = readonly [number, number, number];
 
 /** One cluster per featured project, in card order. */
-export const CLUSTER_COUNT = 6;
+export const CLUSTER_COUNT = 10;
 
 /** Formation indices, as blended by the `uMorph` uniform. */
 export const FORMATION = { core: 0, constellation: 1, lattice: 2, stream: 3 } as const;
@@ -37,9 +37,12 @@ export const SECTION_STATES: readonly SectionState[] = [
   state('contact', FORMATION.stream, [4.4, 0.5, 2.6], [2.6, 0, 0]),
 ];
 
+/** Vertical drop between consecutive project clusters on the helix. */
+export const HELIX_STEP = 0.7;
+
 /** Centre of project cluster k on the descending helix. */
 export function clusterCenter(k: number): Vec3 {
-  return [Math.sin(1.15 * k) * 1.5, 2.6 - 1.05 * k, Math.cos(1.15 * k) * 1.1];
+  return [Math.sin(1.15 * k) * 1.5, 2.6 - HELIX_STEP * k, Math.cos(1.15 * k) * 1.1];
 }
 
 export const CORE = { shellRadius: 1.8, innerRadius: 0.55, ringRadius: 2.7, ringFlatten: 0.22, ringTilt: 0.45 };

@@ -85,9 +85,18 @@ export interface Project {
   /** Two or three sentences on what the project does and how. */
   readonly description: string;
   readonly tags: readonly string[];
-  readonly url: Pending<string>;
+  /** The public GitHub repository, or null when the repository is private. */
+  readonly url: Pending<string> | null;
+  /** Further links after the repository, such as a live demo or a store listing. */
+  readonly links?: readonly Link[];
   /** Featured projects are rendered, in array order. */
   readonly featured: boolean;
+}
+
+/** Every link a project card renders, in order: the public repository (when there is one), then its other links. */
+export function projectHrefs(project: Project): string[] {
+  const repo = project.url === null || isPlaceholder(project.url) ? [] : [project.url];
+  return [...repo, ...(project.links ?? []).map((link) => link.href)];
 }
 
 export interface SkillGroup {
@@ -133,6 +142,7 @@ export interface Portfolio {
     readonly opensInNewTab: string;
     readonly comingSoon: string;
     readonly projectLink: (title: string) => string;
+    readonly privateRepository: string;
   };
   readonly sections: readonly Section[];
   readonly hero: {
@@ -195,8 +205,8 @@ export const portfolio: Portfolio = {
     lang: 'en',
     title: 'Nuno Marques · Senior Full Stack Developer',
     description:
-      'Nuno Marques, Senior Full Stack Developer in Porto. I build banking software with Angular and .NET, ' +
-      'and autonomous AI agents that build software.',
+      'Nuno Marques, Senior Full Stack Developer in Porto: five years building banking software with Angular and ' +
+      '.NET, and my own AI agents, developer tools and apps after hours.',
     author: 'Nuno Marques',
   },
   ui: {
@@ -208,6 +218,7 @@ export const portfolio: Portfolio = {
     opensInNewTab: '(opens in a new tab)',
     comingSoon: 'Coming soon',
     projectLink: (title) => `View ${title} on GitHub`,
+    privateRepository: 'Private repository',
   },
   sections: [
     { id: 'hero', hudState: 'Core online' },
@@ -221,7 +232,9 @@ export const portfolio: Portfolio = {
     name: 'Nuno Marques',
     title: 'Senior Full Stack Developer',
     location: 'Porto',
-    tagline: 'I build banking software with Angular and .NET, and autonomous AI agents that build software.',
+    tagline:
+      'An enthusiastic developer with five years in banking software. After hours I build AI agents, developer ' +
+      'tools and apps.',
     primaryAction: { label: 'View projects', href: '#projects' },
     secondaryAction: { label: 'Get in touch', href: '#contact' },
     availability: 'Open to remote work and relocation across Europe',
@@ -230,17 +243,22 @@ export const portfolio: Portfolio = {
     eyebrow: 'About',
     heading: 'End to end, database to pixel.',
     paragraphs: [
-      'For over five years at Natixis I have delivered Angular and .NET features for banking, owning each one from ' +
-        'database design through frontend integration.',
-      "I built an internal RAG knowledge system over the team's documentation, integrated with Jira, and wrote the " +
-        'reusable skills and practices that helped the team adopt AI assistants.',
-      'Outside work I designed FORJA, an autonomous agent system that plans, implements and independently reviews ' +
-        'software, and I use it to ship my own applications from start to finish.',
+      'I have spent five years at Natixis in Porto, growing from curricular intern to senior full stack developer. ' +
+        'I deliver Angular and .NET features for banking and own each one end to end: database design, REST APIs, ' +
+        'SQL tuned for heavy load, automated tests and the CI/CD pipeline that ships it.',
+      "I also bring AI into the team's daily work. I built a RAG knowledge system over our internal documentation, " +
+        'connected to Jira cards and release notes, and wrote the reusable skills and practices that helped the ' +
+        'team adopt AI assistants. I review code and mentor junior developers.',
+      'Outside work I keep shipping my own products. FORJA, my autonomous agent system, plans, implements and ' +
+        'independently reviews software, and I use it to build the rest: an LLM cost-routing proxy, an Android ' +
+        'workout app, WhatsApp automations for small businesses and local-first Windows tools.',
+      'Most of what I build runs on your own machine, with no accounts and no telemetry. I like software that ' +
+        'respects the people who use it, and I like learning the new tools that make it better.',
     ],
     stats: [
       { value: '5+', label: 'Years at Natixis' },
       { value: 'Senior', label: 'Intern 2021 → Senior 2026' },
-      { value: '6', label: 'Public projects' },
+      { value: '10', label: 'Projects below' },
     ],
     portrait: {
       photo: 'src/assets/portrait/nuno-marques.png',
@@ -269,6 +287,54 @@ export const portfolio: Portfolio = {
         featured: true,
       },
       {
+        repo: 'tollwise',
+        title: 'Tollwise',
+        pitch:
+          'Local proxy for the OpenAI and Anthropic SDKs that sends each request to the cheapest provider able to ' +
+          'serve it, and shows what you saved.',
+        description:
+          'Your code keeps the official SDK and changes only its base URL. Tollwise checks what each request needs ' +
+          '(tools, JSON mode, vision, streaming, context length), picks the cheapest, fastest or most balanced ' +
+          'provider that has all of it, translates between the two API formats when nothing is lost, and reports ' +
+          'cost and savings in response headers and a local dashboard.',
+        tags: ['TypeScript', 'Node.js', 'LLM APIs'],
+        url: `${githubProfile}/tollwise`,
+        links: [{ label: 'Live demo', href: 'https://nunomarques97.github.io/tollwise/demo/' }],
+        featured: true,
+      },
+      {
+        repo: 'gearlift',
+        title: 'Gearlift',
+        pitch:
+          'Android workout app that builds a session from the equipment you have and the muscles you want to train.',
+        description:
+          'Pick your equipment, the muscles to train and your preferences, and Gearlift builds a workout from a ' +
+          'public-domain library of 800+ exercises. Swap exercises, follow timed sets with audio cues, log every ' +
+          'set and keep your history and stats synced to the cloud. Built with React Native and Expo on Firebase, ' +
+          'with Google sign-in, workouts shared by QR code and scheduled reminders. The code is private.',
+        tags: ['React Native', 'Expo', 'Firebase', 'TypeScript'],
+        url: null,
+        links: [
+          { label: 'Get it on Google Play', href: 'https://play.google.com/store/apps/details?id=com.gearlift.app' },
+        ],
+        featured: true,
+      },
+      {
+        repo: 'automacoes-n8n',
+        title: 'Repcastr',
+        pitch:
+          'n8n automations for small businesses: appointment reminders, no-show tracking, client recall and ' +
+          'WhatsApp confirmations.',
+        description:
+          'Four workflows on a self-hosted n8n: a reminder the day before each appointment, a daily no-show log with ' +
+          'the monthly rate, a recall of clients who have not been back in months with the revenue at stake, and ' +
+          'WhatsApp confirmations with reply buttons. Businesses onboard themselves from an invite link and a form, ' +
+          'and one clients table drives every workflow. The repository is private.',
+        tags: ['n8n', 'JavaScript', 'WhatsApp API', 'Astro'],
+        url: null,
+        featured: true,
+      },
+      {
         repo: 'crypto-radar',
         title: 'Crypto Radar',
         pitch:
@@ -293,6 +359,20 @@ export const portfolio: Portfolio = {
           'Code session. It answers aloud with Piper, and no audio ever leaves the PC.',
         tags: ['Python', 'Speech', 'Offline'],
         url: `${githubProfile}/jarvis`,
+        featured: true,
+      },
+      {
+        repo: 'statehop',
+        title: 'Statehop',
+        pitch:
+          'Local-first Windows app that learns your work contexts, such as Development or Gaming, and helps you ' +
+          'switch between them.',
+        description:
+          'Observes the foreground app, running processes and idle time, groups them into sessions and infers the ' +
+          'context you are in, then suggests how to prepare, restore or clean it up. It acts on its own only with ' +
+          'actions you already approved. A native WinUI 3 app on .NET 10 with local SQLite storage, in development.',
+        tags: ['C#', 'WinUI 3', '.NET 10', 'SQLite'],
+        url: `${githubProfile}/statehop`,
         featured: true,
       },
       {
@@ -352,9 +432,15 @@ export const portfolio: Portfolio = {
     eyebrow: 'Stack',
     heading: 'Tools I work with.',
     groups: [
-      { title: 'Frontend', items: ['Angular', 'TypeScript', 'RxJS', 'NgRx', 'HTML', 'CSS', 'React'] },
-      { title: 'Backend', items: ['.NET / C#', 'REST APIs', 'SQL Server', 'MongoDB', 'Python', 'Rust'] },
-      { title: 'Applied AI', items: ['RAG', 'AI agents', 'Claude Code', 'Ollama', 'Jira API'] },
+      {
+        title: 'Frontend',
+        items: ['Angular', 'TypeScript', 'RxJS', 'NgRx', 'HTML', 'CSS', 'React', 'React Native / Expo'],
+      },
+      {
+        title: 'Backend',
+        items: ['.NET / C#', 'REST APIs', 'SQL Server', 'MongoDB', 'Node.js', 'Firebase', 'Python', 'Rust'],
+      },
+      { title: 'Applied AI', items: ['RAG', 'AI agents', 'Claude Code', 'LLM APIs', 'Ollama', 'n8n', 'Jira API'] },
       {
         title: 'Quality & delivery',
         items: ['xUnit', 'NUnit', 'Cypress', 'Jenkins', 'XL Release / Deploy', 'Docker', 'Git'],

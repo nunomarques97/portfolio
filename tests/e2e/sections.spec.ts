@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { isPlaceholder, portfolio } from '../../src/content/portfolio';
+import { isPlaceholder, portfolio, projectHrefs } from '../../src/content/portfolio';
 
 const desktop = { width: 1440, height: 900 };
 const mobile = { width: 390, height: 844 };
@@ -9,7 +9,7 @@ const featured = projects.items.filter((project) => project.featured);
 
 /** Links the keyboard must reach, in visual order: project cards, the profile link, then contact rows. */
 const expectedStops = [
-  ...featured.flatMap((project) => (isPlaceholder(project.url) ? [] : [`projects ${project.url}`])),
+  ...featured.flatMap((project) => projectHrefs(project).map((href) => `projects ${href}`)),
   ...(isPlaceholder(projects.profileLink.href) ? [] : [`projects ${projects.profileLink.href}`]),
   ...contact.links.flatMap((link) => (isPlaceholder(link.href) ? [] : [`contact ${link.href}`])),
   ...(isPlaceholder(contact.cv.file) ? [] : [`contact ${contact.cv.file}`]),
@@ -60,12 +60,20 @@ for (const viewport of [desktop, mobile]) {
         await expect(card).toHaveAccessibleName(project.title);
         await expect(card).toContainText(project.pitch);
         await expect(card.getByRole('listitem')).toHaveText([...project.tags]);
-        const link = card.getByRole('link');
-        await expect(link).toHaveCount(1);
-        await expect(link).toHaveAttribute('href', String(project.url));
-        await expect(link).toHaveAttribute('target', '_blank');
-        await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
-        await expect(link).toHaveAccessibleName(`${ui.projectLink(project.title)} ${ui.opensInNewTab}`);
+        const links = card.getByRole('link');
+        const names = [
+          ...(project.url === null ? [] : [ui.projectLink(project.title)]),
+          ...(project.links ?? []).map((link) => link.label),
+        ];
+        await expect(links).toHaveCount(names.length);
+        for (const [position, href] of projectHrefs(project).entries()) {
+          const link = links.nth(position);
+          await expect(link).toHaveAttribute('href', href);
+          await expect(link).toHaveAttribute('target', '_blank');
+          await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+          await expect(link).toHaveAccessibleName(`${names[position]} ${ui.opensInNewTab}`);
+        }
+        if (project.url === null) await expect(card).toContainText(ui.privateRepository);
       }
       for (const hidden of projects.items.filter((project) => !project.featured)) {
         await expect(section).not.toContainText(hidden.title);
@@ -74,7 +82,7 @@ for (const viewport of [desktop, mobile]) {
       const hrefs = await section
         .locator('article a[href]')
         .evaluateAll((links) => links.map((link) => link.getAttribute('href')));
-      expect(hrefs).toEqual(featured.map((project) => String(project.url)));
+      expect(hrefs).toEqual(featured.flatMap(projectHrefs));
 
       const profile = section.getByRole('link', { name: projects.profileLink.label });
       await expect(profile).toHaveAttribute('href', String(projects.profileLink.href));
@@ -141,7 +149,7 @@ for (const viewport of [desktop, mobile]) {
 
     test('Tab reaches every project and contact link in visual order', async ({ page }) => {
       await page.goto('/');
-      const stops: { id: string; top: number }[] = [];
+      const stops: { id: string; top: number; left: number }[] = [];
       for (let step = 0; step < 80; step += 1) {
         await page.keyboard.press('Tab');
         const focused = await page.evaluate(() => {
@@ -158,8 +166,12 @@ for (const viewport of [desktop, mobile]) {
         stops.push(focused);
       }
       expect(stops.map((stop) => stop.id)).toEqual(expectedStops);
+      // Top to bottom; links that share a row (a repository and its demo) go left to right.
       for (const [index, stop] of stops.entries()) {
-        if (index > 0) expect(stop.top, stop.id).toBeGreaterThan(stops[index - 1]?.top ?? 0);
+        const previous = stops[index - 1];
+        if (!previous) continue;
+        if (Math.abs(stop.top - previous.top) < 2) expect(stop.left, stop.id).toBeGreaterThan(previous.left);
+        else expect(stop.top, stop.id).toBeGreaterThan(previous.top);
       }
     });
 

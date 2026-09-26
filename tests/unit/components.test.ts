@@ -2,7 +2,7 @@ import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import { beforeAll, describe, expect, it } from 'vitest';
 import ExperienceContact from '../../src/components/ExperienceContact.astro';
 import Projects from '../../src/components/Projects.astro';
-import { placeholder, portfolio, type Portfolio } from '../../src/content/portfolio';
+import { placeholder, portfolio, type Portfolio, type Project } from '../../src/content/portfolio';
 
 interface Element {
   tag: string;
@@ -195,6 +195,28 @@ describe('Projects', () => {
     expect(marked).toHaveLength(3);
     for (const element of marked) expectInert(element);
     expect(text(marked[0] as Element)).toContain(portfolio.ui.projectLink('Alpha'));
+  });
+
+  it('notes a private repository as text and adds further links after the repository link', async () => {
+    const [alpha, beta] = baseProjects.items as [Project, Project];
+    const tree = await renderProjects({
+      ...baseProjects,
+      items: [
+        { ...alpha, links: [{ label: 'Live demo', href: 'https://example.com/alpha/demo' }] },
+        { ...beta, url: null, links: [{ label: 'Store', href: 'https://example.com/store/beta' }] },
+      ],
+    });
+    const [first, second] = byTag(tree, 'article') as [Element, Element];
+    expect(byTag(first, 'a').map((link) => link.attrs.href)).toEqual([
+      'https://example.com/alpha',
+      'https://example.com/alpha/demo',
+    ]);
+    const [store] = byTag(second, 'a') as [Element];
+    expect(byTag(second, 'a')).toHaveLength(1);
+    expect(store.attrs).toMatchObject({ href: 'https://example.com/store/beta', target: '_blank' });
+    expect(text(store)).toContain(newTab);
+    expect(text(second)).toContain(portfolio.ui.privateRepository);
+    expect(text(second)).not.toContain(portfolio.ui.projectLink('Beta'));
   });
 });
 

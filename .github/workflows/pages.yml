@@ -28,6 +28,7 @@ jobs:
         env:
           SITE_URL: https://nunomarques97.github.io
           SITE_BASE: /portfolio
+          GOATCOUNTER_ENDPOINT: https://pasmasseiro.goatcounter.com/count
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:

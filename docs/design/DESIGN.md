@@ -288,7 +288,8 @@ shown and the HUD shows its initial state.
   debounced (120 ms).
 - **Size budgets (gzip).** Initial page JS (enhancement, nav, HUD, scene loader) ≤ 12 KB. The scene chunk (tree-shaken
   three.js plus the scene) ≤ 170 KB, loaded by dynamic import only after the page is interactive and WebGL is
-  confirmed. CSS ≤ 20 KB. Fonts (five Latin WOFF2 files) ≤ 120 KB. No request leaves the site origin.
+  confirmed. CSS ≤ 20 KB. Fonts (five Latin WOFF2 files) ≤ 120 KB. No request leaves the site origin, except the
+  invisible GoatCounter visit counter that only the deployed build loads.
 
 ## Accessibility
 

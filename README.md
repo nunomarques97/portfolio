@@ -98,6 +98,12 @@ The capture script builds the site, serves it on a free port and saves viewport 
 `test-results/screenshots/<mode>/<width>-<section>.png`. It prints each path and a JSON manifest (also written
 to `manifest.json` in the same folder) and exits with a non-zero code if any capture fails.
 
+## Visit counter
+
+The deployed site counts visits with [GoatCounter](https://www.goatcounter.com): no cookies and nothing shown on the
+page. The deploy workflow sets `GOATCOUNTER_ENDPOINT`; without it (local builds and tests) the counter script is not
+included. The dashboard is private to its owner.
+
 ## Secret guard
 
 A pre-commit hook blocks commits that contain keys or credentials. Enable it once per clone:

@@ -9,6 +9,8 @@ const pad = (value: number) => String(value).padStart(2, '0');
 const firstSection = sections[0];
 // The site may be served under a sub-path (see SITE_BASE in astro.config.mjs).
 const favicon = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
+// Visit counter, set only by the deploy workflow, so local builds and tests never load it. It shows nothing on the page.
+const analyticsEndpoint: string | undefined = import.meta.env.GOATCOUNTER_ENDPOINT;
 ---
 
 <!doctype html>
@@ -24,6 +26,7 @@ const favicon = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
     <meta property="og:title" content={site.title} />
     <meta property="og:description" content={site.description} />
     <link rel="icon" type="image/svg+xml" href={favicon} />
+    {analyticsEndpoint && <script is:inline async data-goatcounter={analyticsEndpoint} src="https://gc.zgo.at/count.js" />}
     <!-- Marks the document as scripted before first paint, so enhanced layouts never flash their fallback. -->
     <script is:inline>
       document.documentElement.classList.add('js');

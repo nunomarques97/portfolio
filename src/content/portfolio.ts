@@ -248,9 +248,8 @@ export const portfolio: Portfolio = {
         "most of the team's front-end projects. I also write SQL for heavy load, automated tests and CI/CD pipelines.",
       'I upgraded our application from Angular 13 to Angular 22 and moved our .NET services to .NET 10. Both ' +
         'upgrades are finished and in production.',
-      'I also build the AI tools my team uses. I built a RAG system over our internal documentation, connected to ' +
-        'Jira cards and release notes, and wrote AI skills that colleagues use every day. I review code and mentor ' +
-        'the junior developers and interns who join the team.',
+      'I also built a RAG system over our internal documentation, connected to Jira cards and release notes. ' +
+        'I review code and mentor the junior developers and interns who join the team.',
       'In my own time I build my own software. FORJA runs an LLM coding agent as a small software team: it plans the work, ' +
         'writes the code, runs the checks and has every task reviewed separately. I use it to build my other ' +
         'projects, including Tollwise, an Android workout app, WhatsApp automations for small businesses and ' +
@@ -333,7 +332,7 @@ export const portfolio: Portfolio = {
           'and one clients table drives every workflow. The repository is private.',
         tags: ['n8n', 'JavaScript', 'WhatsApp API', 'Astro'],
         url: null,
-        links: [{ label: 'Website', href: 'https://repcastr.com' }],
+        links: [{ label: 'repcastr.com', href: 'https://repcastr.com' }],
         featured: true,
       },
       {
@@ -463,7 +462,7 @@ export const portfolio: Portfolio = {
           'Upgraded the application from Angular 13 to 22 and the .NET services to .NET 10',
           "Technical owner of most of the team's front-end projects",
           'RAG system over internal documentation with Jira integration',
-          'AI skills that colleagues use every day; code review and mentoring',
+          'Code review and mentoring of junior developers and interns',
         ],
       },
       {

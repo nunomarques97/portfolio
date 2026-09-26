@@ -6,8 +6,11 @@
 const GROUPS = '.about-header, .project-list, .skill-grid, .timeline, .contact-list';
 const HEADINGS = 'h1, h2';
 const GLYPHS = '!<>-_\\/[]{}=+*^?#01ABCDEFXZ';
-/** Share of a block that must be in view before it reveals. */
-const THRESHOLD = 0.15;
+/**
+ * A block reveals once its top passes this far above the bottom of the viewport. A margin rather than a visible share,
+ * so a block taller than the viewport reveals as soon as it arrives.
+ */
+const ROOT_MARGIN = '0px 0px -12% 0px';
 const DECODE_MS = 900;
 
 /** The blocks that reveal, in page order: each direct child of a section column, or the children of a group. */
@@ -89,7 +92,7 @@ export function initReveal(win: Window = window): () => void {
     (entries) => {
       for (const entry of entries) if (entry.isIntersecting) show(entry.target as HTMLElement);
     },
-    { threshold: THRESHOLD },
+    { rootMargin: ROOT_MARGIN },
   );
   const showAll = () => {
     for (const target of targets) show(target);

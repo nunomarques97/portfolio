@@ -135,7 +135,9 @@ async function checkContent(page: Page, mode: Mode) {
     await expect(section, id).toBeVisible();
     for (const item of content[id] ?? []) {
       await expect(item, id).toBeVisible();
-      expect(await paintedOpacity(item), `${id}: painted opacity`).toBeGreaterThan(0.95);
+      // Content reveals as it scrolls into view, so each item is brought into view and given time to finish.
+      await item.scrollIntoViewIfNeeded();
+      await expect.poll(() => paintedOpacity(item), { message: `${id}: painted opacity` }).toBeGreaterThan(0.95);
     }
     expect(await horizontalOverflow(page), `${id}: horizontal overflow`).toBe(0);
   }

@@ -62,7 +62,9 @@ const favicon = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
 
 <script>
   import { initScene } from '../scene/index';
+  import { initReveal } from '../scene/reveal';
 
+  initReveal();
   initScene();
 </script>
 
@@ -310,6 +312,36 @@ const favicon = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
     font-weight: var(--weight-bold);
     line-height: var(--leading-heading);
     letter-spacing: var(--tracking-heading);
+  }
+
+  /* Content reveal and heading decode, driven by src/scene/reveal.ts. Blocks are hidden only once it marks them. */
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal [data-reveal] {
+      transition:
+        opacity var(--duration-reveal) var(--ease-out),
+        transform var(--duration-reveal) var(--ease-out),
+        filter var(--duration-reveal) var(--ease-out);
+    }
+
+    .reveal [data-reveal='hidden'] {
+      opacity: 0;
+      transform: translateY(28px);
+      filter: blur(6px);
+    }
+  }
+
+  .decoding {
+    position: relative;
+  }
+
+  .decoding > .decode-text {
+    opacity: 0;
+  }
+
+  .decode-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
   }
 
   .panel {

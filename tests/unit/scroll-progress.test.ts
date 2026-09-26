@@ -216,25 +216,6 @@ describe('choreography', () => {
     expect(choreography.pose.camera[0]).toBeCloseTo(base.camera[0] + 0.5 * PARALLAX.x, 10);
     expect(choreography.pose.camera[1]).toBeCloseTo(base.camera[1] + 0.5 * PARALLAX.y, 10);
   });
-
-  it('reduced motion shows the section keyframe with no retarget, parallax or fade, and repeats exactly', () => {
-    const choreography = createChoreography();
-    choreography.setMode({ retarget: true, parallax: true });
-    choreography.setPointer(0.4, 0.4);
-    choreography.setGoal(PROJECTS + 0.7, 2);
-    frames(1, (dt) => choreography.step(dt));
-
-    choreography.still(PROJECTS, 2);
-    const base = stateAt(PROJECTS);
-    const first = structuredClone(choreography.pose);
-    expect(first.camera).toEqual([...base.camera]);
-    expect(first.target).toEqual([...base.target]);
-    expect(first).toMatchObject({ morph: base.morph, from: PROJECTS, blend: 0, cluster: 2, highlight: 1 });
-    choreography.still(PROJECTS, 2);
-    expect(choreography.pose).toEqual(first);
-    choreography.still(PROJECTS + 1, -1);
-    expect(choreography.pose).toMatchObject({ from: PROJECTS + 1, cluster: -1, highlight: 0 });
-  });
 });
 
 describe('choreography settling', () => {

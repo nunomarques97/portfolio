@@ -41,9 +41,6 @@ function declarations(block: string): Map<string, string> {
 
 const withoutComments = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const rootVars = declarations(blockAfter(withoutComments, ':root'));
-const reducedMotionVars = declarations(
-  blockAfter(blockAfter(withoutComments, '@media (prefers-reduced-motion: reduce)'), ':root'),
-);
 
 function variable(name: string): string {
   const value = rootVars.get(name);
@@ -169,12 +166,6 @@ describe('theme.css motion', () => {
 
   it('declares motion durations', () => {
     expect(durations.length).toBeGreaterThanOrEqual(4);
-  });
-
-  it('sets every duration to zero under prefers-reduced-motion', () => {
-    for (const name of durations) {
-      expect(reducedMotionVars.get(name), name).toMatch(/^0(ms|s)?$/);
-    }
   });
 });
 

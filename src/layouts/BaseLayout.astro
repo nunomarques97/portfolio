@@ -79,10 +79,8 @@ const favicon = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
     background: var(--color-bg);
   }
 
-  @media (prefers-reduced-motion: no-preference) {
-    html {
-      scroll-behavior: smooth;
-    }
+  html {
+    scroll-behavior: smooth;
   }
 
   body {
@@ -247,10 +245,8 @@ const favicon = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
     box-shadow: 0 0 12px var(--accent-cyan);
   }
 
-  @media (prefers-reduced-motion: no-preference) {
-    .hud-dot {
-      animation: hud-pulse var(--duration-pulse) infinite;
-    }
+  .hud-dot {
+    animation: hud-pulse var(--duration-pulse) infinite;
   }
 
   @keyframes hud-pulse {
@@ -315,19 +311,17 @@ const favicon = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
   }
 
   /* Content reveal and heading decode, driven by src/scene/reveal.ts. Blocks are hidden only once it marks them. */
-  @media (prefers-reduced-motion: no-preference) {
-    .reveal [data-reveal] {
-      transition:
-        opacity var(--duration-reveal) var(--ease-out),
-        transform var(--duration-reveal) var(--ease-out),
-        filter var(--duration-reveal) var(--ease-out);
-    }
+  .reveal [data-reveal] {
+    transition:
+      opacity var(--duration-reveal) var(--ease-out),
+      transform var(--duration-reveal) var(--ease-out),
+      filter var(--duration-reveal) var(--ease-out);
+  }
 
-    .reveal [data-reveal='hidden'] {
-      opacity: 0;
-      transform: translateY(28px);
-      filter: blur(6px);
-    }
+  .reveal [data-reveal='hidden'] {
+    opacity: 0;
+    transform: translateY(28px);
+    filter: blur(6px);
   }
 
   .decoding {

@@ -16,7 +16,7 @@ const VIEWPORTS = [
   { width: 390, height: 844 },
 ];
 // Scene states that mean the page has finished starting up (see html[data-scene]).
-const SETTLED_SCENES = ['running', 'reduced', 'unavailable'];
+const SETTLED_SCENES = ['running', 'unavailable'];
 
 function usage(message) {
   console.error(`capture: ${message}`);

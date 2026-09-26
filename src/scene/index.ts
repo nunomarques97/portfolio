@@ -1,6 +1,7 @@
 // Scene loader and lifecycle. Part of the initial bundle, so it stays small and never imports three.js statically:
 // after the page is interactive it checks for WebGL 2, then imports ./particles (three.js) on demand.
-// State is published on html[data-scene]: loading, running, reduced or unavailable (see docs/design/DESIGN.md).
+// State is published on html[data-scene]: loading, running or unavailable (see docs/design/DESIGN.md). Motion always
+// plays: the site does not follow prefers-reduced-motion.
 // The scroll tracker runs from the start, independently of WebGL, and publishes html[data-section].
 import {
   chooseTier,
@@ -8,14 +9,13 @@ import {
   NARROW_QUERY,
   pixelRatioFor,
   readDeviceProfile,
-  REDUCED_MOTION_QUERY,
 } from './capabilities';
 import type { ParticleScene } from './particles';
 import { createScrollTracker, type ScrollState, type ScrollTracker } from './scroll-progress';
 
 export { sectionIndexAt } from './scroll-progress';
 
-export type SceneState = 'loading' | 'running' | 'reduced' | 'unavailable';
+export type SceneState = 'loading' | 'running' | 'unavailable';
 
 /**
  * Test observation point. Only when a test defines `window.__PORTFOLIO_SCENE_PROBE__` before the page loads does the
@@ -24,14 +24,12 @@ export type SceneState = 'loading' | 'running' | 'reduced' | 'unavailable';
 export interface SceneProbe {
   /** Animation frames rendered. */
   frames: number;
-  /** Still frames rendered (reduced motion). */
-  stills: number;
   tier?: string;
   particles?: number;
   /** Scroll progress of the viewport centre, and the progress the field currently shows (it trails while gliding). */
   progress?: number;
   displayed?: number;
-  /** Whether the field has finished gliding to the state in view (always true for a reduced-motion still). */
+  /** Whether the field has finished gliding to the state in view. */
   settled?: boolean;
   /** Section index in view and the active project cluster (-1 for none). */
   section?: number;
@@ -113,7 +111,6 @@ function start(win: Window): Teardown {
   };
   if (!layer) return stopTracking;
 
-  const reducedMotion = win.matchMedia(REDUCED_MOTION_QUERY);
   const narrow = win.matchMedia(NARROW_QUERY);
   const finePointer = win.matchMedia(FINE_POINTER_QUERY);
   const listeners: Teardown[] = [];
@@ -128,10 +125,6 @@ function start(win: Window): Teardown {
   let raf = 0;
   let lastTime = 0;
   let resizeTimer = 0;
-  let stillPending = 0;
-  /** Section and cluster of the last still, so reduced motion re-renders only when one of them changes. */
-  let stillSection = -1;
-  let stillCluster = -1;
 
   const setState = (state: SceneState) => {
     root.dataset.scene = state;
@@ -142,16 +135,10 @@ function start(win: Window): Teardown {
     raf = 0;
   };
 
-  const cancelStill = () => {
-    if (stillPending) win.cancelAnimationFrame(stillPending);
-    stillPending = 0;
-  };
-
   const release = () => {
     finished = true;
     cancelInteractive();
     stopLoop();
-    cancelStill();
     win.clearTimeout(resizeTimer);
     while (listeners.length) listeners.pop()?.();
     const current = scene;
@@ -171,20 +158,6 @@ function start(win: Window): Teardown {
     setState('unavailable');
   };
 
-  const renderStill = () => {
-    cancelStill();
-    if (!scene) return;
-    const { index, cluster } = tracker.state;
-    stillSection = index;
-    stillCluster = cluster;
-    scene.renderStill(index, cluster);
-    if (probe) {
-      probe.displayed = index;
-      probe.settled = true;
-      probe.stills += 1;
-    }
-  };
-
   const frame = (now: number) => {
     raf = win.requestAnimationFrame(frame);
     const dt = Math.min(MAX_FRAME_SECONDS, Math.max(0, (now - lastTime) / 1000));
@@ -199,7 +172,7 @@ function start(win: Window): Teardown {
   };
 
   const startLoop = () => {
-    if (raf || !scene || doc.hidden || reducedMotion.matches) return;
+    if (raf || !scene || doc.hidden) return;
     lastTime = win.performance.now();
     raf = win.requestAnimationFrame(frame);
   };
@@ -211,30 +184,18 @@ function start(win: Window): Teardown {
     if (probe) Object.assign(probe, mode);
   };
 
-  /** Running animates continuously; reduced motion renders one still frame and then only on section change. */
-  const applyMode = () => {
+  /** Starts the animation loop from the state in view (a reload mid-page), never from the hero. */
+  const run = () => {
     if (!scene) return;
-    stopLoop();
-    if (reducedMotion.matches) {
-      setState('reduced');
-      renderStill();
-    } else {
-      setState('running');
-      // Start from the state in view (a reload mid-page, or leaving reduced motion), never from the hero.
-      const { progress, cluster } = tracker.state;
-      scene.choreography.setGoal(progress, cluster);
-      scene.choreography.settle();
-      startLoop();
-    }
+    setState('running');
+    const { progress, cluster } = tracker.state;
+    scene.choreography.setGoal(progress, cluster);
+    scene.choreography.settle();
+    startLoop();
   };
 
   const onScroll = (state: ScrollState) => {
-    if (!scene) return;
-    if (!reducedMotion.matches) {
-      scene.choreography.setGoal(state.progress, state.cluster);
-    } else if (!stillPending && (state.index !== stillSection || state.cluster !== stillCluster)) {
-      stillPending = win.requestAnimationFrame(renderStill);
-    }
+    scene?.choreography.setGoal(state.progress, state.cluster);
   };
 
   const resize = () => {
@@ -264,19 +225,15 @@ function start(win: Window): Teardown {
     listeners.push(tracker.subscribe(onScroll));
     listen(win, 'resize', () => {
       win.clearTimeout(resizeTimer);
-      resizeTimer = win.setTimeout(() => {
-        resize();
-        if (reducedMotion.matches) renderStill();
-      }, RESIZE_DEBOUNCE_MS);
+      resizeTimer = win.setTimeout(resize, RESIZE_DEBOUNCE_MS);
     });
     listen(win, 'pointermove', ((event: PointerEvent) => {
       scene?.choreography.setPointer(event.clientX / win.innerWidth - 0.5, event.clientY / win.innerHeight - 0.5);
     }) as EventListener, { passive: true });
     listen(finePointer, 'change', applyChoreographyMode);
     listen(narrow, 'change', applyChoreographyMode);
-    listen(reducedMotion, 'change', applyMode);
     listen(doc, 'visibilitychange', () => (doc.hidden ? stopLoop() : startLoop()));
-    applyMode();
+    run();
   };
 
   const load = () => {

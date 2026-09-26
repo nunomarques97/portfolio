@@ -18,7 +18,6 @@ export const TIERS = {
 /** Layout breakpoint: at or below it the page uses the mobile composition. */
 export const NARROW_QUERY = '(max-width: 820px)';
 export const COARSE_POINTER_QUERY = '(pointer: coarse)';
-export const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 
 export interface DeviceProfile {
   readonly narrow: boolean;

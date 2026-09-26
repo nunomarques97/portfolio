@@ -7,7 +7,6 @@ const MAX_LAG = 0.5;
 
 interface Probe {
   frames: number;
-  stills: number;
   tier?: string;
   progress?: number;
   displayed?: number;
@@ -23,7 +22,7 @@ type ProbeWindow = Window & { __PORTFOLIO_SCENE_PROBE__: Probe; __displayedSampl
 /** Opts the page into the scene's test probe and records console and page errors. */
 async function observe(page: Page) {
   await page.addInitScript(() => {
-    (window as unknown as ProbeWindow).__PORTFOLIO_SCENE_PROBE__ = { frames: 0, stills: 0 };
+    (window as unknown as ProbeWindow).__PORTFOLIO_SCENE_PROBE__ = { frames: 0 };
   });
   const errors: string[] = [];
   page.on('console', (message) => {
@@ -35,10 +34,10 @@ async function observe(page: Page) {
 
 const probe = (page: Page) =>
   page.evaluate(() => {
-    const { frames, stills, tier, progress, displayed, settled, section, cluster, retarget, parallax } = (
+    const { frames, tier, progress, displayed, settled, section, cluster, retarget, parallax } = (
       window as unknown as ProbeWindow
     ).__PORTFOLIO_SCENE_PROBE__;
-    return { frames, stills, tier, progress, displayed, settled, section, cluster, retarget, parallax };
+    return { frames, tier, progress, displayed, settled, section, cluster, retarget, parallax };
   });
 
 /**
@@ -64,7 +63,25 @@ const inView = (page: Page) =>
   });
 
 /** Waits until the scene has scrolled to the section in view and finished gliding there. */
+/** Waits until a smooth scroll (anchor jumps, keys and focus all use one) has started, if any, and come to rest. */
+const scrollIdle = (page: Page) =>
+  page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        let last = window.scrollY;
+        let still = 0;
+        const check = () => {
+          if (window.scrollY === last) still += 1;
+          else [last, still] = [window.scrollY, 0];
+          if (still >= 6) resolve();
+          else requestAnimationFrame(check);
+        };
+        requestAnimationFrame(check);
+      }),
+  );
+
 async function expectSettledInView(page: Page) {
+  await scrollIdle(page);
   await expect
     .poll(
       async () => {
@@ -132,26 +149,6 @@ const decode = (base64: string) =>
       return context.getImageData(0, 0, bitmap.width, bitmap.height);
     });
 
-/** Pixels whose summed RGB delta exceeds a small tolerance between two same-sized screenshots. */
-function changedPixels(page: Page, a: Buffer, b: Buffer) {
-  return page.evaluate(
-    async ([first64, second64, source]) => {
-      const load = new Function(`return ${source}`)() as typeof decode;
-      const [first, second] = await Promise.all([load(first64), load(second64)]);
-      let changed = 0;
-      for (let i = 0; i < first.data.length; i += 4) {
-        const delta =
-          Math.abs((first.data[i] ?? 0) - (second.data[i] ?? 0)) +
-          Math.abs((first.data[i + 1] ?? 0) - (second.data[i + 1] ?? 0)) +
-          Math.abs((first.data[i + 2] ?? 0) - (second.data[i + 2] ?? 0));
-        if (delta > 24) changed += 1;
-      }
-      return changed;
-    },
-    [a.toString('base64'), b.toString('base64'), decode.toString()] as const,
-  );
-}
-
 /**
  * Mean absolute difference of the average brightness of 24 × 30 px cells between two screenshots, from 0 to 255. The
  * continuous spin and shimmer move individual particles but barely change where the field is bright; a different
@@ -187,10 +184,10 @@ function compositionDistance(page: Page, a: Buffer, b: Buffer) {
   );
 }
 
-async function open(page: Page, state: 'running' | 'reduced' = 'running') {
+async function open(page: Page) {
   const errors = await observe(page);
   await page.goto('/');
-  await expect(page.locator('html')).toHaveAttribute('data-scene', state);
+  await expect(page.locator('html')).toHaveAttribute('data-scene', 'running');
   return errors;
 }
 
@@ -366,35 +363,6 @@ test.describe('choreography: mobile', () => {
       await scrollToSection(page, id, 'center');
       await expectSettledInView(page);
     }
-    expect(errors).toEqual([]);
-  });
-});
-
-test.describe('choreography: reduced motion', () => {
-  test.use({ viewport: desktop, reducedMotion: 'reduce' });
-
-  test('switches the scene statically per section, and consecutive captures while scrolled are stable', async ({ page }) => {
-    const errors = await open(page, 'reduced');
-    for (const [index, id] of ['about', 'projects', 'contact'].map((id, i) => [[1, 2, 5][i] as number, id] as const)) {
-      await scrollToSection(page, id, 'center');
-      await expect.poll(async () => (await probe(page)).section).toBe(index);
-      await expect.poll(async () => (await probe(page)).displayed).toBe(index);
-      await expect(page.locator('html')).toHaveAttribute('data-section', id);
-    }
-    await centreCard(page, 2);
-    await expect.poll(async () => (await probe(page)).cluster).toBe(2);
-    await expect.poll(async () => (await probe(page)).displayed).toBe(2);
-    const stills = (await probe(page)).stills;
-    const first = await sceneCapture(page);
-    await page.waitForTimeout(400);
-    const second = await sceneCapture(page);
-    expect(await changedPixels(page, first, second)).toBe(0);
-    // Scrolling within the same card renders nothing new, and there is no animation loop at all.
-    await page.evaluate(() => window.scrollBy(0, 4));
-    await page.waitForTimeout(200);
-    const after = await probe(page);
-    expect(after.stills).toBe(stills);
-    expect(after.frames).toBe(0);
     expect(errors).toEqual([]);
   });
 });

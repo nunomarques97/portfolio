@@ -40,11 +40,6 @@ export interface ParticleScene {
   resize(width: number, height: number, narrow: boolean): void;
   /** Advances the choreography and the clock by dt seconds, then renders. */
   frame(dt: number): void;
-  /**
-   * Renders section `index` as a still with project cluster `cluster` highlighted (-1 for none): no glide and a
-   * frozen clock (reduced motion).
-   */
-  renderStill(index: number, cluster: number): void;
   dispose(): void;
 }
 
@@ -148,12 +143,6 @@ export function createParticleScene(options: ParticleSceneOptions): ParticleScen
     frame(dt) {
       choreography.step(dt);
       uniforms.uTime.value += dt;
-      render();
-    },
-
-    renderStill(index, cluster) {
-      choreography.still(index, cluster);
-      uniforms.uTime.value = 0;
       render();
     },
 

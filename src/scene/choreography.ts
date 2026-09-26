@@ -53,11 +53,6 @@ export interface Choreography {
   step(dt: number): void;
   /** Jumps every glide to its goal: the settled state for the current goal, with no tween. */
   settle(): void;
-  /**
-   * The reduced-motion composition: the keyframe of section `index` with the camera snapped to it, the cluster
-   * highlight on without transition and no parallax or retargeting.
-   */
-  still(index: number, cluster: number): void;
 }
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -185,16 +180,6 @@ export function createChoreography(states: readonly SectionState[] = SECTION_STA
       pose.highlight = goalCluster >= 0 ? 1 : 0;
       parallaxX = mode.parallax ? pointerX : 0;
       parallaxY = mode.parallax ? pointerY : 0;
-      compose();
-    },
-
-    still(index, cluster) {
-      displayed = Number.isInteger(index) ? Math.min(last, Math.max(0, index)) : 0;
-      focus = 0;
-      parallaxX = 0;
-      parallaxY = 0;
-      pose.cluster = Number.isInteger(cluster) && cluster >= 0 ? cluster : -1;
-      pose.highlight = pose.cluster >= 0 ? 1 : 0;
       compose();
     },
   };

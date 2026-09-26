@@ -15,7 +15,7 @@ const sectionIds = portfolio.sections.map((section) => section.id);
 interface Mode {
   name: string;
   /** Expected html[data-scene] once the page has settled; null when scripts never run. */
-  scene: 'running' | 'reduced' | 'unavailable' | null;
+  scene: 'running' | 'unavailable' | null;
   reducedMotion: 'reduce' | 'no-preference';
   javaScriptEnabled: boolean;
   args: string[];
@@ -23,7 +23,7 @@ interface Mode {
 
 const modes: Mode[] = [
   { name: 'default', scene: 'running', reducedMotion: 'no-preference', javaScriptEnabled: true, args: [] },
-  { name: 'reduced motion', scene: 'reduced', reducedMotion: 'reduce', javaScriptEnabled: true, args: [] },
+  { name: 'reduced motion', scene: 'running', reducedMotion: 'reduce', javaScriptEnabled: true, args: [] },
   {
     name: 'WebGL off',
     scene: 'unavailable',
@@ -223,11 +223,29 @@ interface Stop {
   inScene: boolean;
 }
 
+/** Waits until a smooth scroll (anchor jumps, keys and focus all use one) has started, if any, and come to rest. */
+const scrollIdle = (page: Page) =>
+  page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        let last = window.scrollY;
+        let still = 0;
+        const check = () => {
+          if (window.scrollY === last) still += 1;
+          else [last, still] = [window.scrollY, 0];
+          if (still >= 6) resolve();
+          else requestAnimationFrame(check);
+        };
+        requestAnimationFrame(check);
+      }),
+  );
+
 /** Tabs through the whole page from a fresh load and describes every focus stop until focus leaves the document. */
 async function keyboardWalk(page: Page) {
   const stops: Stop[] = [];
   for (let step = 0; step < 60; step += 1) {
     await page.keyboard.press('Tab');
+    await scrollIdle(page);
     const stop = await page.evaluate((): Stop | null => {
       const element = document.activeElement as HTMLElement | null;
       if (!element || element === document.body) return null;

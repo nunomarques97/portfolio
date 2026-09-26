@@ -10,7 +10,6 @@ const sceneRegion = { x: 820, y: 120, width: 560, height: 660 };
 
 interface Probe {
   frames: number;
-  stills: number;
   tier?: string;
   particles?: number;
   init?: () => void;
@@ -23,7 +22,7 @@ interface Probe {
  */
 async function observe(page: Page) {
   await page.addInitScript(() => {
-    (window as unknown as { __PORTFOLIO_SCENE_PROBE__: Probe }).__PORTFOLIO_SCENE_PROBE__ = { frames: 0, stills: 0 };
+    (window as unknown as { __PORTFOLIO_SCENE_PROBE__: Probe }).__PORTFOLIO_SCENE_PROBE__ = { frames: 0 };
   });
   const errors: string[] = [];
   const chunkRequests: string[] = [];
@@ -39,9 +38,9 @@ async function observe(page: Page) {
 
 const probe = (page: Page) =>
   page.evaluate(() => {
-    const { frames, stills, tier, particles } = (window as unknown as { __PORTFOLIO_SCENE_PROBE__: Probe })
+    const { frames, tier, particles } = (window as unknown as { __PORTFOLIO_SCENE_PROBE__: Probe })
       .__PORTFOLIO_SCENE_PROBE__;
-    return { frames, stills, tier, particles };
+    return { frames, tier, particles };
   });
 
 const call = (page: Page, hook: 'init' | 'teardown') =>
@@ -239,41 +238,6 @@ test.describe('scene: default', () => {
     expect(watch.errors).toEqual([]);
   });
 
-  test('switching to reduced motion while the chunk is loading starts no loop', async ({ page }) => {
-    const watch = await observe(page);
-    const chunk = await holdSceneChunk(page);
-    await page.goto('/');
-    await chunk.seen;
-
-    await page.emulateMedia({ reducedMotion: 'reduce' });
-    chunk.release();
-    await expect(sceneState(page)).toHaveAttribute('data-scene', 'reduced');
-    expect(await framesDuring(page, 500)).toBe(0);
-    expect((await probe(page)).stills).toBeGreaterThan(0);
-    expect(watch.errors).toEqual([]);
-  });
-
-  test('changing prefers-reduced-motion at runtime switches both ways without a second loop', async ({ page }) => {
-    const watch = await observe(page);
-    await page.goto('/');
-    await expect(sceneState(page)).toHaveAttribute('data-scene', 'running');
-    expect(await framesPerTick(page)).toBeCloseTo(1, 0);
-
-    await page.emulateMedia({ reducedMotion: 'reduce' });
-    await expect(sceneState(page)).toHaveAttribute('data-scene', 'reduced');
-    await page.waitForTimeout(50);
-    expect(await framesDuring(page, 500)).toBe(0);
-
-    await page.emulateMedia({ reducedMotion: 'no-preference' });
-    await expect(sceneState(page)).toHaveAttribute('data-scene', 'running');
-    await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.emulateMedia({ reducedMotion: 'no-preference' });
-    await expect(sceneState(page)).toHaveAttribute('data-scene', 'running');
-    expect(await framesPerTick(page)).toBeCloseTo(1, 0);
-    await expect(page.locator('canvas')).toHaveCount(1);
-    expect(watch.errors).toEqual([]);
-  });
-
   test('debounces resize and caps the pixel ratio of the full tier at 2', async ({ browser }) => {
     const context = await browser.newContext({ viewport: desktop, deviceScaleFactor: 3 });
     const page = await context.newPage();
@@ -364,27 +328,19 @@ test.describe('scene: mobile', () => {
   });
 });
 
-test.describe('scene: reduced motion', () => {
+test.describe('scene: reduced motion preference', () => {
   test.use({ viewport: desktop, reducedMotion: 'reduce' });
 
-  test('renders a static composition and re-renders only on section change', async ({ page }) => {
+  test('is ignored: the field animates and the content reveals as for any visitor', async ({ page }) => {
     const watch = await observe(page);
     await page.goto('/');
-    await expect(sceneState(page)).toHaveAttribute('data-scene', 'reduced');
-    await expect(page.locator('canvas')).toHaveCount(1);
-    expect(await canvasPixels(page)).toBeGreaterThan(2000);
-
+    await expect(sceneState(page)).toHaveAttribute('data-scene', 'running');
+    expect(await framesDuring(page, 500)).toBeGreaterThan(5);
     const first = await page.screenshot({ clip: sceneRegion });
-    await page.waitForTimeout(1000);
-    const second = await page.screenshot({ clip: sceneRegion });
-    expect(await changedPixels(page, first, second)).toBe(0);
-    expect((await probe(page)).frames).toBe(0);
-
-    const { stills } = await probe(page);
-    await page.locator('#skills').evaluate((element) => element.scrollIntoView({ block: 'start', behavior: 'instant' }));
-    await expect.poll(async () => (await probe(page)).stills).toBeGreaterThan(stills);
-    expect(await changedPixels(page, first, await page.screenshot({ clip: sceneRegion }))).toBeGreaterThan(2000);
-    expect((await probe(page)).frames).toBe(0);
+    await page.waitForTimeout(500);
+    expect(await changedPixels(page, first, await page.screenshot({ clip: sceneRegion }))).toBeGreaterThan(0);
+    await expect(page.locator('html')).toHaveClass(/\breveal\b/);
+    await expect(page.locator('#skills [data-reveal="hidden"]').first()).toBeAttached();
     expect(watch.errors).toEqual([]);
   });
 });

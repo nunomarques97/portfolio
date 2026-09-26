@@ -71,8 +71,8 @@ npm run placeholders
 node scripts/guard-keys.mjs --all
 ```
 
-`tests/e2e/matrix.spec.ts` checks the whole page at 1440 and 390 px in four modes (default, reduced motion, WebGL
-off, JavaScript disabled): every section and its content visible, no serious or critical axe violations, no
+`tests/e2e/matrix.spec.ts` checks the whole page at 1440 and 390 px in four modes (default, reduced motion preference,
+WebGL off, JavaScript disabled): every section and its content visible, no serious or critical axe violations, no
 horizontal overflow, no console errors and no request that leaves the site origin. It also walks the page with the
 keyboard from the skip link to the last contact link. Run it alone with `npx playwright test tests/e2e/matrix.spec.ts`.
 
@@ -89,7 +89,7 @@ node scripts/run-script.mjs <script> [args...]
 
 ```sh
 npm run capture
-npm run capture -- --motion reduce   # emulate prefers-reduced-motion
+npm run capture -- --motion reduce   # emulate prefers-reduced-motion (the site ignores it on purpose)
 npm run capture -- --webgl off       # launch the browser with WebGL disabled
 ```
 

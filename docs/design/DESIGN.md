@@ -21,7 +21,7 @@ edges that never carry information the content lacks.
 
 **Direction and rejected alternatives.** The chosen direction is the "signal field" described above. Two alternatives
 were rejected. A *tunnel fly-through with section gates* makes the motion compete with reading, carries a
-motion-sickness risk and has a weak reduced-motion equivalent. A *single morphing monolith mesh* is cheaper, but it
+motion-sickness risk. A *single morphing monolith mesh* is cheaper, but it
 cannot map the projects to distinct nodes, so the scene stops meaning anything in the most important section.
 
 ## Palette
@@ -195,24 +195,23 @@ HUD is hidden. Nothing scales the desktop poster down: the composition changes f
 
 Motion shows that the system is alive and where the reader is. It never gates reading.
 
-| Motion | Communicates | Duration / easing | Static equivalent (reduced motion) |
-| --- | --- | --- | --- |
-| Formation morph on scroll | Moving to the next part of the story | Held for the first 60% of a section, then smoothstep over the last 40%; damped at `1 − e^(−3.2·dt)` | The formation for the section in view, switched at the section boundary with no tween |
-| Camera glide between keyframes | Changing viewpoint on the same system | Same damping | Camera snapped to the section keyframe |
-| Core spin (0.08 rad/s), shimmer | The system is online | Continuous | None; still frame |
-| Pointer parallax (±0.8 / 0.6 units, desktop fine pointer only) | Depth | Same damping | None |
-| Active-cluster highlight | "This project is that node" | Damped fade; card `--duration-emphasis` | Highlight shown without transition |
-| Content reveal (fade, 28 px rise, 6 px blur) | New content arriving | `--duration-reveal` 900 ms, `--ease-out` | Content visible immediately |
-| Heading decode (glyph scramble resolving left to right) | Signal being decoded | `--duration-decode` 900 ms, once per heading | Final text shown immediately |
-| Hover lift and glow | Affordance | `--duration-base` 300 ms | Colour and border change only |
-| HUD dot pulse | Live status | `--duration-pulse` 2 s | Solid dot |
+| Motion | Communicates | Duration / easing |
+| --- | --- | --- |
+| Formation morph on scroll | Moving to the next part of the story | Held for the first 60% of a section, then smoothstep over the last 40%; damped at `1 − e^(−3.2·dt)` |
+| Camera glide between keyframes | Changing viewpoint on the same system | Same damping |
+| Core spin (0.08 rad/s), shimmer | The system is online | Continuous |
+| Pointer parallax (±0.8 / 0.6 units, desktop fine pointer only) | Depth | Same damping |
+| Active-cluster highlight | "This project is that node" | Damped fade; card `--duration-emphasis` |
+| Content reveal (fade, 28 px rise, 6 px blur) | New content arriving | `--duration-reveal` 900 ms, `--ease-out` |
+| Heading decode (glyph scramble resolving left to right) | Signal being decoded | `--duration-decode` 900 ms, once per heading |
+| Hover lift and glow | Affordance | `--duration-base` 300 ms |
+| HUD dot pulse | Live status | `--duration-pulse` 2 s |
 
 Rules: content is visible without JavaScript. The reveal's hidden state only applies once a script marks the document
-as enhanced and motion is allowed. The decode animates an `aria-hidden` overlay over the real heading text, which
+as enhanced. The decode animates an `aria-hidden` overlay over the real heading text, which
 stays in the DOM (hidden only visually while decoding), so the accessible name never changes and the final text
 reserves its space without layout shift. Nothing flashes more than three times per second. Native scroll only: no
-smooth-scroll library, no pinning, no scroll hijacking. `scroll-behavior: smooth` applies to anchor jumps only when
-motion is allowed.
+smooth-scroll library, no pinning, no scroll hijacking. `scroll-behavior: smooth` applies to anchor jumps.
 
 ## 3D scene concept
 
@@ -265,11 +264,9 @@ Performance budget), so a wide coarse-pointer device keeps the desktop layout wi
 
 ## Reduced motion
 
-With `prefers-reduced-motion: reduce`, all `--duration-*` variables become 0 (enforced by the unit test). The scene is
-set to `html[data-scene="reduced"]`. It renders a single still frame of the current section's formation, camera and
-colours, and renders again only when the section changes (no animation loop, spin, shimmer, parallax or tween).
-Reveals, the decode, the HUD pulse, hover lifts and smooth scrolling are off, and all content is visible immediately.
-Changing the preference at runtime switches mode without reload.
+Motion always plays. The site deliberately does not follow `prefers-reduced-motion`: the audience is
+recruiters, and the motion is the point of the page. Visitors with that preference get the same animated scene,
+reveals, decode, pulse and hover lifts as everyone else. Content stays readable without JavaScript and without WebGL.
 
 ## No-WebGL fallback
 
@@ -285,8 +282,8 @@ shown and the HUD shows its initial state.
   p95 frame ≤ 25 ms). Mobile tier: ≥ 30 fps under 4× CPU throttling. A software renderer invalidates the measurement.
 - **Tiers.** Full: 26,000 particles, DPR ≤ 2. Lite (≤ 820 px, coarse pointer, `hardwareConcurrency` ≤ 4 or
   `deviceMemory` ≤ 4): 9,000 particles, DPR ≤ 1.5.
-- **Frame work.** One draw call and no per-frame allocation. The loop pauses when the tab is hidden; in reduced
-  motion it renders on section change only. Resize is debounced (120 ms).
+- **Frame work.** One draw call and no per-frame allocation. The loop pauses when the tab is hidden. Resize is
+  debounced (120 ms).
 - **Size budgets (gzip).** Initial page JS (enhancement, nav, HUD, scene loader) ≤ 12 KB. The scene chunk (tree-shaken
   three.js plus the scene) ≤ 170 KB, loaded by dynamic import only after the page is interactive and WebGL is
   confirmed. CSS ≤ 20 KB. Fonts (five Latin WOFF2 files) ≤ 120 KB. No request leaves the site origin.
@@ -304,7 +301,7 @@ shown and the HUD shows its initial state.
 - Reflows without horizontal scroll at 320 CSS px and at 200% zoom; touch targets are at least 44 px where possible
   (never under 24 px).
 - External links are marked visually (↗) and for screen readers ("opens in a new tab"). Placeholders are never links.
-- `html lang="en"`; motion respects `prefers-reduced-motion`; nothing flashes.
+- `html lang="en"`; motion plays for every visitor (see Reduced motion); nothing flashes.
 
 ## Open visual points
 

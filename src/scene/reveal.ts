@@ -1,7 +1,6 @@
 // Content reveal and heading decode (see "Motion principles" in docs/design/DESIGN.md). Part of the initial bundle.
-// Content is visible by default: blocks are hidden only after this script marks them, and only while motion is
-// allowed, so no-JS and reduced-motion visits show everything at once.
-import { REDUCED_MOTION_QUERY } from './capabilities';
+// Content is visible by default: blocks are hidden only after this script marks them, so a visit without JavaScript
+// shows everything at once. Motion always plays: the site does not follow prefers-reduced-motion.
 
 /** Blocks inside a section column whose children reveal one by one instead of as a whole. */
 const GROUPS = '.about-header, .project-list, .skill-grid, .timeline, .contact-list';
@@ -76,15 +75,13 @@ function decode(win: Window, heading: HTMLElement): void {
 export function initReveal(win: Window = window): () => void {
   const doc = win.document;
   const root = doc.documentElement;
-  const reducedMotion = win.matchMedia(REDUCED_MOTION_QUERY);
-  if (reducedMotion.matches || typeof IntersectionObserver !== 'function') return () => {};
+  if (typeof IntersectionObserver !== 'function') return () => {};
 
   const targets = revealTargets(doc);
   const show = (target: HTMLElement) => {
     if (target.dataset.reveal !== 'hidden') return;
     target.dataset.reveal = 'shown';
     observer.unobserve(target);
-    if (reducedMotion.matches) return;
     const headings = target.matches(HEADINGS) ? [target] : Array.from(target.querySelectorAll<HTMLElement>(HEADINGS));
     for (const heading of headings) decode(win, heading);
   };
@@ -97,9 +94,11 @@ export function initReveal(win: Window = window): () => void {
   const showAll = () => {
     for (const target of targets) show(target);
   };
-  // Keyboard focus, printing and a switch to reduced motion never wait for a block to scroll into view.
+  // Keyboard focus and printing never wait for a block to scroll into view.
   const onFocus = (event: FocusEvent) => {
     const target = targets.find((item) => item.contains(event.target as Node));
+    // A focused control must be visible at once, so its block skips the transition.
+    if (target?.dataset.reveal === 'hidden') target.style.transition = 'none';
     if (target) show(target);
   };
 
@@ -110,13 +109,11 @@ export function initReveal(win: Window = window): () => void {
   root.classList.add('reveal');
   doc.addEventListener('focusin', onFocus);
   win.addEventListener('beforeprint', showAll);
-  reducedMotion.addEventListener('change', showAll);
 
   return () => {
     observer.disconnect();
     doc.removeEventListener('focusin', onFocus);
     win.removeEventListener('beforeprint', showAll);
-    reducedMotion.removeEventListener('change', showAll);
     root.classList.remove('reveal');
     for (const target of targets) delete target.dataset.reveal;
   };

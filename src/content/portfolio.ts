@@ -205,8 +205,8 @@ export const portfolio: Portfolio = {
     lang: 'en',
     title: 'Nuno Marques · Senior Full Stack Developer',
     description:
-      'Nuno Marques, Senior Full Stack Developer in Porto: five years building banking software with Angular and ' +
-      '.NET, and my own AI agents, developer tools and apps after hours.',
+      'Nuno Marques, Senior Full Stack Developer in Porto. Five years building banking software with Angular and ' +
+      '.NET at Natixis. In my own time I build AI agents, developer tools and apps.',
     author: 'Nuno Marques',
   },
   ui: {
@@ -233,31 +233,32 @@ export const portfolio: Portfolio = {
     title: 'Senior Full Stack Developer',
     location: 'Porto',
     tagline:
-      'An enthusiastic developer with five years in banking software. After hours I build AI agents, developer ' +
-      'tools and apps.',
+      'I have spent five years at Natixis building banking software with Angular and .NET. In my own time I build ' +
+      'AI agents, developer tools and apps.',
     primaryAction: { label: 'View projects', href: '#projects' },
     secondaryAction: { label: 'Get in touch', href: '#contact' },
     availability: 'Open to remote or hybrid work, and to relocation across Europe',
   },
   about: {
     eyebrow: 'About',
-    heading: 'End to end, database to pixel.',
+    heading: 'What I do.',
     paragraphs: [
-      'I have spent five years at Natixis in Porto, growing from curricular intern to senior full stack developer. ' +
-        'I deliver Angular and .NET features for banking and own each one end to end: database design, REST APIs, ' +
-        'SQL tuned for heavy load, automated tests and the CI/CD pipeline that ships it.',
-      "I also bring AI into the team's daily work. I built a RAG knowledge system over our internal documentation, " +
-        'connected to Jira cards and release notes, and wrote the reusable skills and practices that helped the ' +
-        'team adopt AI assistants. I review code and mentor junior developers.',
-      'Outside work I keep shipping my own products. FORJA, my autonomous agent system, plans, implements and ' +
-        'independently reviews software, and I use it to build the rest: an LLM cost-routing proxy, an Android ' +
-        'workout app, WhatsApp automations for small businesses and local-first Windows tools.',
-      'Most of what I build runs on your own machine, with no accounts and no telemetry. I like software that ' +
-        'respects the people who use it, and I like learning the new tools that make it better.',
+      'I joined Natixis in Porto as an intern in 2021 and was promoted three times, to senior full stack developer ' +
+        'in 2026. I build Angular front ends and C# / .NET REST APIs on SQL Server, and I am the technical owner of ' +
+        "most of the team's front-end projects. I also write SQL for heavy load, automated tests and CI/CD pipelines.",
+      'I upgraded our application from Angular 13 to Angular 22 and moved our .NET services to .NET 10. Both ' +
+        'upgrades are finished and in production.',
+      'I also build the AI tools my team uses. I built a RAG system over our internal documentation, connected to ' +
+        'Jira cards and release notes, and wrote AI skills that colleagues use every day. I review code and mentor ' +
+        'the junior developers and interns who join the team.',
+      'In my own time I build my own software. FORJA runs Claude Code as a small software team: it plans the work, ' +
+        'writes the code, runs the checks and has every task reviewed separately. I use it to build my other ' +
+        'projects, including Tollwise, an Android workout app, WhatsApp automations for small businesses and ' +
+        'Windows tools. Most of them run on your own machine, with no account and no telemetry.',
     ],
     stats: [
       { value: '5+', label: 'Years at Natixis' },
-      { value: 'Senior', label: 'Intern 2021 → Senior 2026' },
+      { value: 'Senior', label: 'Intern in 2021, promoted three times' },
       { value: '10', label: 'Projects below' },
     ],
     portrait: {
@@ -270,14 +271,14 @@ export const portfolio: Portfolio = {
   },
   projects: {
     eyebrow: 'Selected projects',
-    heading: 'Things I built.',
+    heading: 'What I build in my own time.',
     items: [
       {
         repo: 'forja',
         title: 'FORJA',
         pitch:
-          'Turns Claude Code into a small autonomous software team: a controller that plans, develops, runs checks ' +
-          'and gets every task independently reviewed.',
+          'Runs Claude Code as a small software team. It plans, writes the code, runs the checks and gets every ' +
+          'task independently reviewed.',
         description:
           'A Node.js command-line orchestrator for work in an existing Git project. Each phase starts a fresh ' +
           'Claude Code or Codex session, while a small controller owns task state, executed checks, retry ' +
@@ -338,7 +339,7 @@ export const portfolio: Portfolio = {
         repo: 'crypto-radar',
         title: 'Crypto Radar',
         pitch:
-          'Local-first crypto market radar: deterministic Kraken analysis with a local model as advisor. ' +
+          'Watches Kraken crypto markets with deterministic rules and asks a local model for a second opinion. ' +
           'It never places orders.',
         description:
           'Watches public Kraken spot and perpetual markets and narrows them down through four deterministic ' +
@@ -352,7 +353,7 @@ export const portfolio: Portfolio = {
       {
         repo: 'jarvis',
         title: 'Jarvis',
-        pitch: 'Offline voice assistant that hands spoken commands to Claude Code sessions. No paid cloud.',
+        pitch: 'Offline voice assistant that hands spoken commands to Claude Code sessions. It uses no paid cloud service.',
         description:
           'Listens for "hey jarvis", transcribes speech on the local GPU with faster-whisper and routes it ' +
           'through a fixed allow-list: small local actions run directly and everything else goes to a Claude ' +
@@ -391,8 +392,8 @@ export const portfolio: Portfolio = {
         repo: 'seekai',
         title: 'SeekAI',
         pitch:
-          'Windows tray launcher for filename, full-text and local semantic search. ' +
-          'No cloud AI, accounts or telemetry.',
+          'Windows tray launcher that searches your files by name, by content and by meaning. It runs on your ' +
+          'machine, with no cloud AI, account or telemetry.',
         description:
           'A Windows tray launcher, opened with Ctrl + Space, that searches the folders you choose by filename, ' +
           'by full text with SQLite FTS5 and by meaning with local Ollama embeddings. A native WPF app on .NET ' +
@@ -405,8 +406,8 @@ export const portfolio: Portfolio = {
         repo: 'sextant',
         title: 'Sextant',
         pitch:
-          'Quantitative crypto research system: pre-registered studies, costs always included and walk-forward ' +
-          'validation only. Places no real orders.',
+          'Research system that tests whether crypto trading strategies still make money after costs. It places no ' +
+          'real orders.',
         description:
           'Asks whether any family of crypto strategies keeps a robust edge after costs, across Binance and ' +
           'Kraken. Every study is pre-registered, costs are always included, only walk-forward results count, ' +
@@ -430,7 +431,7 @@ export const portfolio: Portfolio = {
   },
   skills: {
     eyebrow: 'Stack',
-    heading: 'Tools I work with.',
+    heading: 'Languages, frameworks and tools.',
     groups: [
       {
         title: 'Frontend',
@@ -457,26 +458,28 @@ export const portfolio: Portfolio = {
         title: 'Senior Full Stack Developer',
         current: true,
         highlights: [
-          'Angular and .NET (C#) features, from database design to frontend integration',
+          'Angular front ends and C# / .NET REST APIs on SQL Server',
+          'Upgraded the application from Angular 13 to 22 and the .NET services to .NET 10',
+          "Technical owner of most of the team's front-end projects",
           'RAG system over internal documentation with Jira integration',
-          'Reusable AI skills and practices for the team; code review and mentoring',
+          'AI skills that colleagues use every day; code review and mentoring',
         ],
       },
       {
-        period: 'Feb 2023',
+        period: 'Feb 2023 — Feb 2026',
         title: 'Developer',
         current: false,
         summary: 'REST APIs, SQL optimisation under heavy load, CI/CD with Jenkins and XL Release/Deploy.',
       },
       {
-        period: 'Nov 2022',
+        period: 'Nov 2022 — Feb 2023',
         title: 'Junior Developer',
         current: false,
         summary: 'Automated tests with xUnit, NUnit and Cypress; batch jobs for critical financial workflows.',
       },
       {
         period: 'Feb 2021 — Nov 2022',
-        title: 'Curricular Intern → Intern',
+        title: 'Intern',
         current: false,
         summary: 'Joined the team while finishing my degree.',
       },
@@ -491,8 +494,8 @@ export const portfolio: Portfolio = {
   },
   contact: {
     eyebrow: 'Contact',
-    heading: "Let's talk.",
-    lede: 'Open to full stack and applied AI roles: remote, hybrid or with relocation across Europe.',
+    heading: 'Get in touch.',
+    lede: 'I am open to full stack and applied AI roles, remote or hybrid. I can also relocate within Europe.',
     email,
     links: [
       { kind: 'email', label: 'Email', display: email, href: `mailto:${email}`, external: false },

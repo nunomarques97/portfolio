@@ -2,7 +2,6 @@
 // principles and hardware), docs/BRAIN.md (the conversation brain, its connection and default model), docs/MODELOS.md
 // (voice and accent adaptation measurements) and docs/ROADMAP.md.
 import type { CaseStudy } from './index';
-import { placeholder } from '../portfolio';
 
 const caseStudy: CaseStudy = {
   repo: 'jarvis',
@@ -153,7 +152,6 @@ const caseStudy: CaseStudy = {
       'prompt cache, and writes 30 to 150.',
     'European Portuguese is not usable day to day yet: an earlier measurement on the author\'s voice gave a word ' +
       'error rate of 38 to 46%.',
-    placeholder('Latency and tokens per exchange measured with the real brain, from a session in your own voice'),
   ],
   nextSteps: [
     'Measure the real brain on the PC, Haiku against Sonnet, before changing the default model.',

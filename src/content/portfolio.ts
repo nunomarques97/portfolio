@@ -414,8 +414,8 @@ export const portfolio: Portfolio = {
           'real orders.',
         description:
           'Asks whether any family of crypto strategies keeps a robust edge after costs, across Binance and ' +
-          'Kraken. Every study is pre-registered, costs are always included, only walk-forward results count, ' +
-          'and live trading stays locked behind explicit criteria.',
+          'Kraken. Built so look-ahead bias, lost delisted coins and venue lock-in are hard to introduce, with costs ' +
+          'always included and live trading locked behind written criteria.',
         tags: ['Python', 'Research'],
         url: `${githubProfile}/sextant`,
         featured: true,

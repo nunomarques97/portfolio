@@ -4,7 +4,6 @@
 // and docs/STATE.md (the calendar contract, the WhatsApp webhook and its signature check, test evidence, what is live,
 // tracked risks and next actions).
 import type { CaseStudy } from './index';
-import { placeholder } from '../portfolio';
 
 const caseStudy: CaseStudy = {
   repo: 'automacoes-n8n',
@@ -146,8 +145,6 @@ const caseStudy: CaseStudy = {
       'no crossover, one business\'s failure not stopping the others, and unknown or forged requests refused.',
     'On a generated set of 800 fake appointments, the no-show and recall reports matched a separate count by hand.',
     'On 26 September 2026 the site passed 85 unit tests and 57 browser tests.',
-    placeholder('Businesses signed up and live, and reminders sent, once there are real customers'),
-    placeholder('Change in the no-show rate for a real business, measured before and after'),
   ],
   nextSteps: [
     'Sign up the first business: invite, form, WhatsApp setup with Meta, then switch it on.',

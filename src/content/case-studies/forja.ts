@@ -1,7 +1,6 @@
 // Case study of FORJA, written from its public repository: README.md (what it is, how it works, evidence, design
 // decisions, quick start and status) and docs/CORE.md (the execution contract every session works under).
 import type { CaseStudy } from './index';
-import { placeholder } from '../portfolio';
 
 const caseStudy: CaseStudy = {
   repo: 'forja',
@@ -119,13 +118,11 @@ const caseStudy: CaseStudy = {
     'A candidate test-writing mode caught 23 of 24 faulty variants, the same as the existing mode, but took 24.1% ' +
       'longer. It was not adopted.',
     'These are small experiments, and they do not show that FORJA can deliver every complex product on its own.',
-    placeholder('Projects or people using FORJA other than its author, if there are any'),
   ],
   nextSteps: [
     'Assign specialists to tasks while a run is in progress. This is proposed and not built yet.',
     'Let several writers work in one project at the same time. This is proposed and not built yet.',
     'Replan a run while it is in progress. This is proposed and not built yet.',
-    placeholder('Which of these comes first, and when'),
   ],
 };
 

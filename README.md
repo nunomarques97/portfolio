@@ -77,7 +77,7 @@ npm run placeholders
 ```
 
 lists every placeholder left, with its path and what to supply: first those in `src/content/portfolio.ts`, then
-those in the case studies, with paths such as `caseStudies.tollwise.results[5]`. The main content file has none at
+those in the case studies, with paths such as `caseStudies.<slug>.results[2]`. The main content file has none at
 the moment: the portrait is `src/assets/portrait/nuno-marques.png` (a larger 4:5 photo, at least 704 × 880 px, would
 be sharper) and the CV is `public/nuno-marques-cv.pdf`.
 

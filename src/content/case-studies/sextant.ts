@@ -1,90 +1,82 @@
-// Case study of Sextant, written from its public repository: README.md (status, results of SEXTANT-004 to SEXTANT-006
-// F1, what it is, the mode ladder and the checks), docs/adr/0001-stack-and-layout.md, docs/adr/0003-llm-risk-boundary.md,
-// docs/adr/0005-bar-storage-parquet-and-duckdb.md and docs/PRE-REGISTRATION-006-F2.md (the next family and its drift
-// guard).
+// Case study of Sextant, written only from its public repository: README.md (status, what it is, the mode ladder, the
+// checks and the layout), docs/PHASE-0-FINDINGS.md, docs/DATA-AVAILABILITY.md and docs/adr/0001 to 0004.
 import type { CaseStudy } from './index';
-import { placeholder } from '../portfolio';
 
 const caseStudy: CaseStudy = {
   repo: 'sextant',
   slug: 'sextant',
   problem: [
-    'Sextant asks one question: is there any family of crypto trading strategies with an edge robust enough to ' +
-      'justify building the rest of the system? It is a research system across Binance and Kraken, and it places ' +
-      'no real orders.',
-    'Backtests are easy to fool. Look-ahead bias, survivorship bias, costs left out and variants tried until one ' +
-      'looks good can all make a losing idea look like a winner. Sextant is built so those mistakes are hard to ' +
-      'make: every study is written down before it runs, every cost is charged, and only out-of-sample results ' +
-      'count.',
+    'Sextant is meant to answer one question: is there any family of crypto trading strategies with an edge robust ' +
+      'enough to trade, across Binance and Kraken? Before any strategy is written, it has to be a system in which ' +
+      'that question can be answered honestly.',
+    'The expensive mistakes in this kind of research are architectural. Look-ahead bias, a dataset that silently ' +
+      'drops the coins that died, a strategy that quietly depends on one exchange, or a language model that ends up ' +
+      'setting position size can all make a losing idea look like a winner. Sextant is built so those mistakes are ' +
+      'hard to make, and so far it places no orders at all.',
   ],
   constraints: [
-    'Nothing places an order. The only network calls fetch public historical archives, no private endpoint is ' +
-      'wired, and live mode cannot start.',
-    'Every study is pre-registered: the hypothesis, the variant grid and the criteria are committed before anything ' +
-      'they govern is computed. The runner refuses to start if the code has drifted from them.',
-    'No strategy is ever judged on gross returns. Fees, spread, slippage, funding, FX and delisting are all charged, ' +
-      'with every euro accounted in exact decimals.',
-    'Walk-forward is the only mode, so no part of the system ever holds an in-sample result.',
-    'Binance and Kraken are independent adapters, and no code branches on the name of a venue.',
+    'Nothing places an order. The only network calls read public market data, no credential is used, and live mode ' +
+      'cannot start.',
+    'Binance and Kraken are independent adapters. No code branches on the name of a venue, and the two adapters ' +
+      'cannot import each other.',
+    'No strategy will ever be judged on gross returns: fees, spread, slippage and funding are modelled per venue.',
     'A language model may suggest a direction, a strategy, a confidence or a regime. It may never set size, ' +
       'leverage, exposure, stop distance or any risk budget.',
-    'One developer and a multi-day horizon on tens of instruments: nothing is latency-sensitive, so research speed ' +
-      'and rules enforced by tooling matter more than raw speed.',
+    'One developer with long gaps between changes, so only rules that tooling enforces are trusted to survive.',
   ],
   diagram: {
-    title: 'How Sextant tests a strategy family',
+    title: 'How Sextant is layered',
     description:
-      'A study is pre-registered and its trials are counted before anything runs. Public archives from Binance and ' +
-      'Kraken are stored as exact bars. The walk-forward engine charges every cost, and the statistics compare the ' +
-      'result with a null baseline and the full trial count before a verdict is written.',
-    groups: [{ id: 'engine', label: 'Walk-forward engine' }],
+      'The command line resolves a profile and runs preflight before wiring the engine. The engine sees only ports, ' +
+      'the ports speak in pure domain types, and the venue adapters implement those ports against public market ' +
+      'data, recording every request.',
+    groups: [{ id: 'core', label: 'Core, free of any venue' }],
     nodes: [
+      { id: 'cli', kind: 'client', label: 'Command line', detail: 'status, run and the data spike' },
       {
-        id: 'prereg',
+        id: 'app',
         kind: 'component',
-        label: 'Pre-registration',
-        detail: 'Hypothesis, variant grid and criteria, committed first',
+        label: 'Configuration and preflight',
+        detail: 'Defaults to backtest; live needs three gates',
       },
-      { id: 'registry', kind: 'store', label: 'Trial registry', detail: 'Append-only and hash-chained' },
       {
-        id: 'archives',
-        kind: 'external',
-        label: 'Public archives',
-        detail: 'Binance and Kraken history, no private endpoint',
-      },
-      { id: 'bars', kind: 'store', label: 'Bar store', detail: 'Parquet files read with DuckDB, exact decimals' },
-      {
-        id: 'backtest',
+        id: 'engine',
         kind: 'component',
-        group: 'engine',
-        label: 'Backtest',
-        detail: 'Point-in-time universe, out-of-sample only',
+        group: 'core',
+        label: 'Engine',
+        detail: 'Features, regime, strategies, risk, execution',
       },
       {
-        id: 'costs',
+        id: 'ports',
         kind: 'component',
-        group: 'engine',
-        label: 'Cost model',
-        detail: 'Fees, spread, slippage, funding, FX, delisting',
+        group: 'core',
+        label: 'Ports',
+        detail: 'Exchange, bars, clock, cost model, language model',
       },
       {
-        id: 'stats',
+        id: 'domain',
         kind: 'component',
-        group: 'engine',
-        label: 'Statistics',
-        detail: 'Matched null baseline, Deflated Sharpe Ratio',
+        group: 'core',
+        label: 'Domain',
+        detail: 'Pure types that import nothing else',
       },
-      { id: 'verdict', kind: 'component', label: 'Report and verdict', detail: 'Read against the registered criteria' },
+      {
+        id: 'adapters',
+        kind: 'component',
+        label: 'Venue adapters',
+        detail: 'Binance and Kraken, independent and read-only',
+      },
+      { id: 'venues', kind: 'external', label: 'Public market data', detail: 'Binance API and archive, Kraken API' },
+      { id: 'journal', kind: 'store', label: 'Request journal', detail: 'Every call, with its status and size' },
     ],
     edges: [
-      { from: 'prereg', to: 'registry', label: 'Every trial, charged before the engine runs' },
-      { from: 'archives', to: 'bars', label: 'Ingested idempotently, with recorded checksums' },
-      { from: 'bars', to: 'backtest', label: 'Bars as of each rebalance' },
-      { from: 'prereg', to: 'backtest', label: 'Registered grid' },
-      { from: 'backtest', to: 'costs', label: 'Every simulated trade' },
-      { from: 'costs', to: 'stats', label: 'Net returns after every cost' },
-      { from: 'registry', to: 'stats', label: 'Honest trial count' },
-      { from: 'stats', to: 'verdict', label: 'Results against each criterion' },
+      { from: 'cli', to: 'app', label: 'Chosen profile' },
+      { from: 'app', to: 'engine', label: 'Wiring, after a passing preflight' },
+      { from: 'engine', to: 'ports', label: 'Only through these interfaces' },
+      { from: 'ports', to: 'domain', label: 'Typed values' },
+      { from: 'adapters', to: 'ports', label: 'Implements' },
+      { from: 'adapters', to: 'venues', label: 'Public requests, no credential' },
+      { from: 'adapters', to: 'journal', label: 'Every request recorded' },
     ],
   },
   decisions: [
@@ -92,57 +84,58 @@ const caseStudy: CaseStudy = {
       decision:
         'Enforce the boundary between the language model and risk in the response schemas: extra fields are ' +
         'rejected, and a field named after size, leverage, risk or similar breaks the build at import.',
-      rejected:
-        'A rule in the documentation backed by code review, or letting the model propose a size that the risk code ' +
-        'then caps.',
+      rejected: 'A rule in the documentation, marked as advisory and backed by code review.',
       reason:
-        'A written rule decays and fails silently. A proposed size becomes an anchor that risk logic adjusts instead ' +
-        'of ignoring, and it blurs the audit trail. A value that cannot be expressed cannot be smuggled through.',
+        'The danger is drift, such as a notes field that starts carrying "suggest 3x". A written rule decays and ' +
+        'fails silently; a value the schema cannot express cannot be smuggled through.',
     },
     {
       decision:
-        'Python 3.12 with uv, in a ports and adapters layout whose layers are enforced by import-linter, with strict ' +
-        'mypy.',
-      rejected: '.NET (C#), for its compiler and first-class decimals.',
+        'Python 3.12 with uv, in a ports and adapters layout whose layers are enforced in CI by import-linter, with ' +
+        'strict mypy.',
+      rejected: 'Another language with a stronger compiler.',
       reason:
-        'The tools for walk-forward evaluation, the Deflated Sharpe Ratio and cost modelling live in Python. The ' +
+        'The tools for market data, statistics, walk-forward evaluation and exchange access live in Python. The ' +
         'expensive mistakes here, such as look-ahead bias or a model that sets size, are architectural, and a ' +
         'compiler does not prevent them.',
     },
     {
       decision:
-        'Store bars as Parquet files, one per venue, symbol and timeframe, queried with DuckDB, with prices kept as ' +
-        'strings.',
-      rejected: 'SQLite, the closest call, or the JSON files an earlier spike used.',
+        'Model what each venue allows as the intersection of three layers: the venue, the account and the ' +
+        'jurisdiction, with jurisdiction rules kept as configuration data.',
+      rejected: 'Conditionals on the name of the venue wherever a feature differs.',
       reason:
-        'Bars are read as whole series across hundreds of files, a columnar scan that SQLite is worst at, and JSON ' +
-        'took about 8 times the space. Strings round-trip exactly to decimals, so no value is truncated to a fixed ' +
-        'precision.',
+        'Those conditionals spread into execution, data and backtests until adding a venue means auditing ' +
+        'everything. Regulations change without any code change, so they belong in data.',
+    },
+    {
+      decision:
+        'Read public market data with httpx, quarantined inside the exchange adapters, and never return an empty ' +
+        'result for a failed request.',
+      rejected: 'ccxt, which puts every venue behind one normalised interface.',
+      reason:
+        'Normalising venues is the opposite of keeping venue-specific reasoning in its adapter. A silent empty ' +
+        'result on a delisted coin is how a survivorship-biased dataset gets built without anyone noticing.',
     },
   ],
   results: [
-    'Momentum and trend following: 16 variants were committed before any data was downloaded, then run over 52 ' +
-      'out-of-sample months of Binance spot history in EUR. Every one of the 80 variant-cells lost money in the ' +
-      'backtest, the best 28.40% of the account and the worst 99.77%. Bitcoin bought and held at the same costs ' +
-      'returned +86.31%.',
-    'Every momentum variant lost money before a single fee was charged, so no cost assumption could rescue it. The ' +
-      'Deflated Sharpe Ratio is 0.0000 at an honest trial count of 253, and the verdict was insufficient evidence.',
-    'Cash-and-carry: 9 variants across 4 cost cells, all 36 trials charged before the engine ran, and every one ' +
-      'lost money over 56 out-of-sample months, the best 5.74% and the worst 91.81%. The best-funded variant ' +
-      'received 387.33 EUR of funding on 1,500 of equity, and its price legs gave most of it back.',
-    'Two defects made the first cash-and-carry run void. Both are now regression tested, every registered ' +
-      'parameter is perturbed by a test that checks the output moves, and the void rows still count in the trial ' +
-      'registry.',
-    'Ten held names gave only 2.3 effectively independent bets, because crypto names move together at a ' +
-      'correlation of 0.36. And a 52-month out-of-sample window can only resolve an annualised Sharpe above about ' +
-      '0.94.',
-    placeholder('Results of the long-short cross-sectional family, once its pre-registered run is reported'),
+    'The engineering foundation is in place: the layered package, the capability model, layered configuration, ' +
+      'credentials handling, preflight, structured logging and CI. ruff, strict mypy, import-linter and pytest must ' +
+      'all pass before a change is merged.',
+    'Both venue adapters read health, instruments and bars from the real public endpoints, with a rate limiter ' +
+      'per venue and every request recorded in a journal.',
+    'A data-availability study answered the first research question by measurement. On Binance a point-in-time ' +
+      'universe including delisted coins can be rebuilt back to August 2017; on Kraken it cannot be rebuilt from ' +
+      'public data at all.',
+    'It also showed why that matters: of the 238 in-scope Binance instruments listed on 1 January 2021, 119, exactly ' +
+      'half, no longer trade. A backtest built from today\'s list would silently drop the half that died.',
+    'The Binance collection made 1,393 calls with no credential, and every one returned 200.',
   ],
   nextSteps: [
-    'Run the long-short cross-sectional family on perpetuals under its pre-registration, which is already ' +
-      'committed.',
-    'Then test the remaining strategy families, one at a time, each pre-registered before it runs.',
-    "Let each family's verdict decide whether building the rest of the system is justified.",
+    'Store bars in columnar files keyed by venue, symbol and timeframe, keeping the delisted coins.',
+    'Then the backtester, tested against look-ahead bias by replacing every future bar with garbage and checking ' +
+      'that no earlier decision changes, and against survivorship bias by running with and without delisted coins.',
+    'Live trading stays blocked until every criterion in the written live gates is demonstrated and signed off.',
   ],
 };
 

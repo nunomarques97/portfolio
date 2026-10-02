@@ -6,7 +6,6 @@
 // src/analytics/index.ts, src/config/features.ts, docs/audits/nun-147-logic-architecture-audit.md,
 // docs/phase-2-personalization.md and app.json.
 import type { CaseStudy } from './index';
-import { placeholder } from '../portfolio';
 
 const caseStudy: CaseStudy = {
   repo: 'gearlift',
@@ -141,7 +140,6 @@ const caseStudy: CaseStudy = {
     'The Firestore security rules are tested on the local emulator with 24 assertions that cover every read, write, ' +
       'list and delete across two users.',
     '408 Jest tests passed during the architecture audit in September 2026.',
-    placeholder('Installs, active users or ratings from the Google Play Console'),
   ],
   nextSteps: [
     'Shape sets, reps and session length from a user profile: goal, experience and activity level. The rules that ' +

@@ -3,7 +3,6 @@
 // model benchmark and what comes next), RISK.md (hard boundaries and the old cost preview), radar_v08/anomaly.py (why
 // the anomaly scores are robust), radar_v08/notifications.py and radar_v08/ntfy.py (how alerts are delivered).
 import type { CaseStudy } from './index';
-import { placeholder } from '../portfolio';
 
 const caseStudy: CaseStudy = {
   repo: 'crypto-radar',
@@ -115,7 +114,6 @@ const caseStudy: CaseStudy = {
     'A frozen benchmark of 100 development and 200 holdout cases has been run on the local models. Neither ' +
       'qwen3:14b nor llama3.2 passed the promotion gates, so no model is promoted and the default stays pinned.',
     'No real data has been calibrated yet, so the radar makes no claim about how often its alerts are right.',
-    placeholder('How useful the alerts turned out to be, once outcome labels have matured and been evaluated'),
   ],
   nextSteps: [
     'Wire the cost scenarios and the 15 minute, 1 hour, 4 hour and 24 hour outcome labels into the running ' +

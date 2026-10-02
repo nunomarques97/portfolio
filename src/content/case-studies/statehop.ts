@@ -3,7 +3,6 @@
 // the observation service, the session builder, the app normaliser, the executable path policy, the retention policy
 // and the storage schema.
 import type { CaseStudy } from './index';
-import { placeholder } from '../portfolio';
 
 const caseStudy: CaseStudy = {
   repo: 'statehop',
@@ -130,7 +129,6 @@ const caseStudy: CaseStudy = {
       'Raw events are kept for 90 days, then rolled up into daily totals.',
     'The session builder that turns a day into timeline blocks is built and tested, and the Day Strip design for the ' +
       'timeline was chosen from three HTML mocks, in light and dark.',
-    placeholder('CPU and memory use of the running app over a full working day, once measured'),
   ],
   nextSteps: [
     'Show the day as the Day Strip in the running app, checked in light, dark and high contrast, with keyboard ' +

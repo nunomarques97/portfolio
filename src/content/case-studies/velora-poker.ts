@@ -3,7 +3,6 @@
 // of src-tauri/src/import/validate.rs, watcher/mod.rs, table_track/mod.rs and overlay/manager.rs, and the message of
 // its latest commit (the multi-table HUD).
 import type { CaseStudy } from './index';
-import { placeholder } from '../portfolio';
 
 const caseStudy: CaseStudy = {
   repo: 'velora-poker',
@@ -139,7 +138,6 @@ const caseStudy: CaseStudy = {
     'The integrity checks ran against a corpus of 275 real hands from 22 files and reject none of them, and a test ' +
       'keeps it that way. Hands that fail to parse are counted and explained in the app, never dropped silently.',
     'Rust tests run against sample hand-history files, and the code is under the MIT licence.',
-    placeholder('Import speed on large hand histories and overlay cost with many tables open, once measured'),
   ],
   nextSteps: [
     'Parsers for other poker rooms and other hand-history languages.',

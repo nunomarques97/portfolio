@@ -1,7 +1,6 @@
 // Case study of Tollwise, written from its public repository: README.md, ROADMAP.md, docs/routing.md,
 // docs/compatibility.md, docs/privacy.md, docs/benchmarks.md, package.json and the module layout under src/.
 import type { CaseStudy } from './index';
-import { placeholder } from '../portfolio';
 
 const caseStudy: CaseStudy = {
   repo: 'tollwise',
@@ -144,7 +143,6 @@ const caseStudy: CaseStudy = {
       'not, against a local Ollama model. Tollwise has not been tested against the real OpenAI or Anthropic APIs.',
     'A static demo of the dashboard runs in the browser with sample data, with nothing to install.',
     'Tollwise is a pre-release that runs from source. There is no published package yet.',
-    placeholder('Savings measured on a real bill, or usage by people other than the author, if there is any'),
   ],
   nextSteps: [
     'Support more of the OpenAI and Anthropic APIs, such as the Responses and embeddings endpoints, which answer 501 ' +

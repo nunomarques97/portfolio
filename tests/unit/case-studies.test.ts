@@ -85,9 +85,9 @@ describe('case-study entries', () => {
     }
   });
 
-  it('drafts Tollwise in full, with a placeholder only for evidence its repository does not have', () => {
+  it('drafts Tollwise in full, with no placeholder', () => {
     const tollwise = caseStudiesBySlug.tollwise as CaseStudy;
-    expect(findPlaceholders(tollwise).map((item) => item.path)).toEqual(['results[5]']);
+    expect(findPlaceholders(tollwise)).toEqual([]);
     expect(tollwise.decisions.length).toBeGreaterThanOrEqual(2);
     const diagram = tollwise.diagram as Diagram;
     expect(diagram.nodes.length).toBeGreaterThanOrEqual(5);
@@ -449,7 +449,7 @@ describe('case-study page', () => {
 });
 
 describe('npm run placeholders', () => {
-  it('lists every case-study placeholder with its path and hint, after the main content file', async () => {
+  it('reports the case-study placeholders after the main content file', async () => {
     const script = fileURLToPath(new URL('../../scripts/list-placeholders.mjs', import.meta.url));
     const result = await new Promise<{ code: number; stdout: string }>((resolve) => {
       execFile(process.execPath, [script], { shell: false }, (error, stdout) => {
@@ -463,8 +463,8 @@ describe('npm run placeholders', () => {
     expect(main).toBeGreaterThanOrEqual(0);
     expect(studies).toBeGreaterThan(main);
     const pending = findPlaceholders(caseStudiesBySlug, 'caseStudies');
-    expect(pending.length).toBeGreaterThan(0);
-    expect(stdout).toContain(`${pending.length} placeholder`);
+    if (pending.length === 0) expect(stdout).toContain('No placeholders left in src/content/case-studies/.');
+    else expect(stdout).toContain(`${pending.length} placeholder`);
     for (const item of pending) {
       expect(item.path).toMatch(/^caseStudies\.[a-z0-9-]+[.[]?/);
       expect(stdout).toContain(`- ${item.path}\n  ${item.hint}\n`);

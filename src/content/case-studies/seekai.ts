@@ -2,7 +2,6 @@
 // behaviour, V1 limits), TESTING.md (the verification of 2026-09-19), src/SeekAI.Core/Ollama.cs and
 // src/SeekAI.Core/SearchIndex.cs.
 import type { CaseStudy } from './index';
-import { placeholder } from '../portfolio';
 
 const caseStudy: CaseStudy = {
   repo: 'seekai',
@@ -119,12 +118,11 @@ const caseStudy: CaseStudy = {
     'A restart scan with real embeddings found 4 unchanged files and embedded 0 new chunks.',
     'Checked by hand on the desktop: Ctrl + Space from another app opens the launcher with the search field focused, ' +
       'Enter opens the file in its default app, and Esc hides the launcher.',
-    placeholder('Search speed and index size on a real personal collection, once measured'),
   ],
   nextSteps: [
-    placeholder('A next step for SeekAI, for example a file watcher, since V1 needs Reindex or a restart after edits'),
-    placeholder('A next step for SeekAI, for example OCR, since V1 skips scanned PDFs'),
-    placeholder('A next step for SeekAI, for example an installer, updates and start with Windows, which V1 lacks'),
+    'Watch the chosen folders for changes, since V1 needs Reindex or a restart after edits.',
+    'Read scanned PDFs with OCR, which V1 skips.',
+    'Add an installer, updates and start with Windows, which V1 does not have.',
   ],
 };
 

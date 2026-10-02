@@ -3,55 +3,8 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import ExperienceContact from '../../src/components/ExperienceContact.astro';
 import Projects from '../../src/components/Projects.astro';
 import { placeholder, portfolio, type Portfolio, type Project } from '../../src/content/portfolio';
-
-interface Element {
-  tag: string;
-  attrs: Record<string, string>;
-  children: Node[];
-}
-type Node = Element | string;
-
-const voidTags = new Set(['area', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'wbr']);
-
-/** Parses the rendered markup into a tree. Enough for component output; not a general HTML parser. */
-function parse(html: string): Element {
-  const root: Element = { tag: '#root', attrs: {}, children: [] };
-  const stack = [root];
-  const pattern = /<!--[\s\S]*?-->|<\/([a-z0-9-]+)\s*>|<([a-z0-9-]+)((?:\s+[^\s=>/]+(?:="[^"]*")?)*)\s*(\/?)>|([^<]+)/gi;
-  for (const match of html.matchAll(pattern)) {
-    const [, closing, opening, rawAttrs = '', selfClosing, text] = match;
-    const parent = stack.at(-1) ?? root;
-    if (text !== undefined) {
-      parent.children.push(text);
-    } else if (opening) {
-      const attrs: Record<string, string> = {};
-      for (const [, name = '', value = ''] of rawAttrs.matchAll(/([^\s=]+)(?:="([^"]*)")?/g)) attrs[name] = value;
-      const element: Element = { tag: opening.toLowerCase(), attrs, children: [] };
-      parent.children.push(element);
-      if (!selfClosing && !voidTags.has(element.tag)) stack.push(element);
-    } else if (closing) {
-      const index = stack.map((item) => item.tag).lastIndexOf(closing.toLowerCase());
-      if (index > 0) stack.length = index;
-    }
-  }
-  return root;
-}
-
-function all(element: Element, test: (item: Element) => boolean): Element[] {
-  return element.children.flatMap((child) =>
-    typeof child === 'string' ? [] : [...(test(child) ? [child] : []), ...all(child, test)],
-  );
-}
-
-const byTag = (element: Element, tag: string) => all(element, (item) => item.tag === tag);
-
-function text(node: Node): string {
-  const raw = typeof node === 'string' ? node : node.children.map(text).join('');
-  return raw
-    .replace(/&#x27;|&#39;/g, "'")
-    .replace(/&amp;/g, '&')
-    .replace(/\s+/g, ' ');
-}
+import { all, byTag, parse, text, type Element } from './html';
+import { caseStudyFor, caseStudyPath } from '../../src/content/case-studies';
 
 function section(tree: Element, id: string): Element {
   const found = all(tree, (item) => item.tag === 'section' && item.attrs.id === id)[0];
@@ -134,8 +87,27 @@ beforeAll(async () => {
   container = await AstroContainer.create();
 });
 
+const studies = [
+  { repo: 'alpha', slug: 'alpha-study' },
+  { repo: 'beta', slug: 'beta-study' },
+];
+
 async function renderProjects(projects: Portfolio['projects']) {
-  return parse(await container.renderToString(Projects, { props: { projects } }));
+  return parse(await container.renderToString(Projects, { props: { projects, studies } }));
+}
+
+/** The case-study link of a card: internal, same tab, named after the project. Returns the card's other links. */
+function expectCaseStudyLink(article: Element, project: Project): Element[] {
+  const [first, ...rest] = byTag(article, 'a') as [Element, ...Element[]];
+  const slug = studies.find((study) => study.repo === project.repo)?.slug;
+  expect(first.attrs.href).toBe(`/projects/${slug}/`);
+  expect(first.attrs).not.toHaveProperty('target');
+  expect(first.attrs).not.toHaveProperty('rel');
+  expect(text(first)).toContain(portfolio.ui.caseStudyLink(project.title));
+  expect(text(first)).toContain(project.title);
+  expect(text(first)).not.toContain('↗');
+  expect(text(first)).not.toContain(newTab);
+  return rest;
 }
 
 async function renderContact(contact: Portfolio['contact']) {
@@ -168,7 +140,7 @@ describe('Projects', () => {
       expect(byTag(article, 'ul')).toHaveLength(1);
       expect(byTag(article, 'li').map((tag) => text(tag).trim())).toEqual(project.tags);
 
-      const links = byTag(article, 'a');
+      const links = expectCaseStudyLink(article, project);
       expect(links).toHaveLength(1);
       const link = links[0] as Element;
       expect(link.attrs).toMatchObject({ href: project.url, target: '_blank', rel: 'noopener noreferrer' });
@@ -190,7 +162,12 @@ describe('Projects', () => {
   it('renders placeholder URLs as non-focusable marked text, never as links', async () => {
     const tree = await renderProjects(placeholderProjects);
     expect(byTag(tree, 'article')).toHaveLength(2);
-    expect(byTag(tree, 'a')).toEqual([]);
+    // Only the case-study links, which are never placeholders, remain links.
+    const articles = byTag(tree, 'article');
+    for (const [index, article] of articles.entries()) {
+      expect(expectCaseStudyLink(article, placeholderProjects.items[index] as Project)).toEqual([]);
+    }
+    expect(byTag(tree, 'a')).toHaveLength(2);
     const marked = all(tree, (item) => 'data-placeholder' in item.attrs);
     expect(marked).toHaveLength(3);
     for (const element of marked) expectInert(element);
@@ -208,15 +185,39 @@ describe('Projects', () => {
     });
     const [first, second] = byTag(tree, 'article') as [Element, Element];
     expect(byTag(first, 'a').map((link) => link.attrs.href)).toEqual([
+      '/projects/alpha-study/',
       'https://example.com/alpha',
       'https://example.com/alpha/demo',
     ]);
-    const [store] = byTag(second, 'a') as [Element];
-    expect(byTag(second, 'a')).toHaveLength(1);
+    const [store] = expectCaseStudyLink(second, beta) as [Element];
+    expect(byTag(second, 'a')).toHaveLength(2);
     expect(store.attrs).toMatchObject({ href: 'https://example.com/store/beta', target: '_blank' });
     expect(text(store)).toContain(newTab);
     expect(text(second)).toContain(portfolio.ui.privateRepository);
     expect(text(second)).not.toContain(portfolio.ui.projectLink('Beta'));
+  });
+});
+
+describe('Projects and case studies', () => {
+  it('refuses to render a featured project without a case study', async () => {
+    await expect(
+      container.renderToString(Projects, { props: { projects: baseProjects, studies: studies.slice(0, 1) } }),
+    ).rejects.toThrow(/"beta" has no case study/);
+  });
+
+  it('links every featured card of the real content to its case study page', async () => {
+    const tree = parse(await container.renderToString(Projects));
+    const featured = portfolio.projects.items.filter((project) => project.featured);
+    const articles = byTag(tree, 'article');
+    expect(articles).toHaveLength(featured.length);
+    for (const [index, project] of featured.entries()) {
+      const [first] = byTag(articles[index] as Element, 'a') as [Element];
+      const study = caseStudyFor(project.repo);
+      expect(study, project.repo).toBeDefined();
+      expect(first.attrs.href).toBe(caseStudyPath(import.meta.env.BASE_URL, study?.slug ?? ''));
+      expect(first.attrs).not.toHaveProperty('target');
+      expect(text(first)).toContain(project.title);
+    }
   });
 });
 

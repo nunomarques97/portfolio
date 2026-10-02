@@ -1,0 +1,479 @@
+---
+// The content of one case-study page: title block with the project's tags and links, the six sections in a fixed
+// order, then links back to the projects and to the neighbouring case studies. Any pending value renders as a
+// placeholder: marked text that is never a link.
+import { caseStudyUi, type CaseStudy } from '../content/case-studies';
+import { isPlaceholder, portfolio, type Project } from '../content/portfolio';
+import Diagram from './Diagram.astro';
+import Placeholder from './Placeholder.astro';
+
+interface Neighbour {
+  title: string;
+  href: string;
+}
+
+interface Props {
+  study: CaseStudy;
+  project: Project;
+  /** URL of the projects section of the home page. */
+  back: string;
+  previous: Neighbour;
+  next: Neighbour;
+}
+
+const { study, project, back, previous, next } = Astro.props;
+const { ui } = portfolio;
+const labels = caseStudyUi.sections;
+const { diagram } = study;
+const repository = project.url === null || isPlaceholder(project.url) ? null : project.url;
+const ids = {
+  problem: 'problem',
+  constraints: 'constraints',
+  architecture: 'architecture',
+  decisions: 'decisions',
+  results: 'results',
+  nextSteps: 'next-steps',
+} as const;
+---
+
+<article class="case-study" aria-labelledby="case-study-title">
+  <header class="case-study-header">
+    <p class="eyebrow">{caseStudyUi.eyebrow}</p>
+    <h1 id="case-study-title" class="case-study-title">{project.title}</h1>
+    <p class="case-study-lede">{project.pitch}</p>
+    <div class="case-study-meta" role="group" aria-label={caseStudyUi.metaLabel}>
+      <ul class="case-study-tags">
+        {project.tags.map((tag) => <li>{tag}</li>)}
+      </ul>
+      <div class="case-study-links">
+        {
+          project.url === null ? (
+            <span class="case-study-link case-study-private">{ui.privateRepository}</span>
+          ) : repository === null ? (
+            <Placeholder class="case-study-link case-study-placeholder-link">
+              {ui.projectLink(project.title)}
+              <span class="placeholder-note">{ui.comingSoon}</span>
+            </Placeholder>
+          ) : (
+            <a class="case-study-link" href={repository} target="_blank" rel="noopener noreferrer">
+              {ui.projectLink(project.title)}
+              <span aria-hidden="true"> ↗</span>
+              <span class="visually-hidden"> {ui.opensInNewTab}</span>
+            </a>
+          )
+        }
+        {
+          project.links?.map((link) => (
+            <a class="case-study-link" href={link.href} target="_blank" rel="noopener noreferrer">
+              {link.label}
+              <span aria-hidden="true"> ↗</span>
+              <span class="visually-hidden"> {ui.opensInNewTab}</span>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </header>
+
+  <section class="case-study-section" id={ids.problem} aria-labelledby={`${ids.problem}-heading`}>
+    <h2 id={`${ids.problem}-heading`}>{labels.problem}</h2>
+    {
+      study.problem.map((paragraph) =>
+        isPlaceholder(paragraph) ? (
+          <p>
+            <Placeholder class="case-study-placeholder">
+              <span class="placeholder-label">{ui.comingSoon}</span> {paragraph.hint}
+            </Placeholder>
+          </p>
+        ) : (
+          <p>{paragraph}</p>
+        ),
+      )
+    }
+  </section>
+
+  <section class="case-study-section" id={ids.constraints} aria-labelledby={`${ids.constraints}-heading`}>
+    <h2 id={`${ids.constraints}-heading`}>{labels.constraints}</h2>
+    <ul class="case-study-list">
+      {
+        study.constraints.map((item) => (
+          <li>
+            {isPlaceholder(item) ? (
+              <Placeholder class="case-study-placeholder">
+                <span class="placeholder-label">{ui.comingSoon}</span> {item.hint}
+              </Placeholder>
+            ) : (
+              item
+            )}
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="case-study-section" id={ids.architecture} aria-labelledby={`${ids.architecture}-heading`}>
+    <h2 id={`${ids.architecture}-heading`}>{labels.architecture}</h2>
+    {
+      isPlaceholder(diagram) ? (
+        <Placeholder as="div" class="case-study-placeholder case-study-placeholder-block">
+          <span class="placeholder-label">{ui.comingSoon}</span> {diagram.hint}
+        </Placeholder>
+      ) : (
+        <Diagram diagram={diagram} id={`${study.slug}-diagram`} />
+      )
+    }
+  </section>
+
+  <section class="case-study-section" id={ids.decisions} aria-labelledby={`${ids.decisions}-heading`}>
+    <h2 id={`${ids.decisions}-heading`}>{labels.decisions}</h2>
+    <ol class="case-study-decisions">
+      {
+        study.decisions.map((item) => (
+          <li class="panel case-study-decision">
+            <dl>
+              {(
+                [
+                  [caseStudyUi.decisionLabel, item.decision],
+                  [caseStudyUi.rejectedLabel, item.rejected],
+                  [caseStudyUi.reasonLabel, item.reason],
+                ] as const
+              ).map(([label, value]) => (
+                <div class="case-study-decision-row">
+                  <dt>{label}</dt>
+                  <dd>
+                    {isPlaceholder(value) ? (
+                      <Placeholder class="case-study-placeholder">
+                        <span class="placeholder-label">{ui.comingSoon}</span> {value.hint}
+                      </Placeholder>
+                    ) : (
+                      value
+                    )}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  {
+    (['results', 'nextSteps'] as const).map((key) => (
+      <section class="case-study-section" id={ids[key]} aria-labelledby={`${ids[key]}-heading`}>
+        <h2 id={`${ids[key]}-heading`}>{labels[key]}</h2>
+        <ul class="case-study-list">
+          {study[key].map((item) => (
+            <li>
+              {isPlaceholder(item) ? (
+                <Placeholder class="case-study-placeholder">
+                  <span class="placeholder-label">{ui.comingSoon}</span> {item.hint}
+                </Placeholder>
+              ) : (
+                item
+              )}
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+
+  <nav class="case-study-pager" aria-label={caseStudyUi.pagerLabel}>
+    <a class="case-study-back" href={back}><span aria-hidden="true">←</span>{caseStudyUi.backLink}</a>
+    <div class="case-study-neighbours">
+      <a class="case-study-neighbour" href={previous.href} rel="prev">
+        <span class="case-study-neighbour-label">{caseStudyUi.previous}</span>
+        <span class="case-study-neighbour-title">{previous.title}</span>
+      </a>
+      <a class="case-study-neighbour case-study-neighbour-next" href={next.href} rel="next">
+        <span class="case-study-neighbour-label">{caseStudyUi.next}</span>
+        <span class="case-study-neighbour-title">{next.title}</span>
+      </a>
+    </div>
+  </nav>
+</article>
+
+<style>
+  .case-study {
+    width: min(760px, 100%);
+  }
+
+  .case-study-header {
+    padding: var(--space-8) 0 var(--space-6);
+  }
+
+  .case-study-title {
+    margin: 0 0 var(--space-4);
+    color: var(--text-primary);
+    font-size: var(--text-case-title);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-heading);
+    letter-spacing: var(--tracking-heading);
+    overflow-wrap: anywhere;
+  }
+
+  .case-study-lede {
+    max-width: 40ch;
+    margin: 0 0 var(--space-5);
+    color: var(--text-body);
+    font-size: var(--text-lede);
+    line-height: 1.45;
+  }
+
+  .case-study-meta {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .case-study-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .case-study-tags li {
+    max-width: 100%;
+    padding: 4px 9px;
+    border: 1px solid var(--line-hairline);
+    border-radius: var(--radius-pill);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+  .case-study-links {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: var(--space-5);
+    align-items: baseline;
+  }
+
+  .case-study-link {
+    display: inline-block;
+    max-width: 100%;
+    padding: 12px 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: 0.1em;
+    line-height: 1.4;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+  }
+
+  a.case-study-link {
+    color: var(--text-signal);
+    text-decoration: none;
+  }
+
+  a.case-study-link:hover,
+  a.case-study-link:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .case-study-private {
+    color: var(--text-muted);
+  }
+
+  .case-study-placeholder-link {
+    padding: 6px 12px;
+    border-radius: var(--radius-chip);
+  }
+
+  .placeholder-note::before {
+    content: ' · ';
+  }
+
+  .case-study-section {
+    padding: var(--space-6) 0;
+    border-top: 1px solid var(--line-hairline);
+  }
+
+  .case-study-section h2 {
+    margin: 0 0 var(--space-5);
+    color: var(--text-primary);
+    font-size: var(--text-case-h2);
+  }
+
+  .case-study-section p,
+  .case-study-list {
+    max-width: 68ch;
+    color: var(--text-body);
+  }
+
+  .case-study-section p {
+    margin: 0 0 var(--space-4);
+  }
+
+  .case-study-list {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0;
+    padding-left: 1.2em;
+  }
+
+  .case-study-list li::marker {
+    color: var(--text-accent);
+  }
+
+  .case-study-decisions {
+    display: grid;
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .case-study-decision {
+    padding: var(--space-5);
+    backdrop-filter: none;
+  }
+
+  .case-study-decision dl {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0;
+  }
+
+  .case-study-decision-row {
+    display: grid;
+    grid-template-columns: 9ch minmax(0, 1fr);
+    gap: var(--space-4);
+  }
+
+  .case-study-decision dt {
+    padding-top: 0.3em;
+    color: var(--text-accent);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+
+  .case-study-decision dd {
+    margin: 0;
+    color: var(--text-body);
+    overflow-wrap: anywhere;
+  }
+
+  .case-study-decision-row:first-child dd {
+    color: var(--text-primary);
+    font-weight: var(--weight-medium);
+  }
+
+  .case-study-placeholder {
+    display: inline-block;
+    max-width: 100%;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-chip);
+    font-size: var(--text-small);
+    overflow-wrap: anywhere;
+  }
+
+  .case-study-placeholder-block {
+    display: block;
+    padding: var(--space-6) var(--space-5);
+    border-radius: var(--radius-card);
+  }
+
+  .placeholder-label {
+    margin-right: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+
+  .case-study-pager {
+    display: grid;
+    gap: var(--space-5);
+    padding: var(--space-6) 0 var(--space-7);
+    border-top: 1px solid var(--line-hairline);
+  }
+
+  /* Flex items drop leading spaces, so the gap separates the arrow from the label. */
+  .case-study-back {
+    justify-self: start;
+    display: inline-flex;
+    gap: 0.6em;
+    align-items: center;
+    min-height: 44px;
+    padding: 10px 20px;
+    border: 1px solid var(--border-control);
+    border-radius: var(--radius-pill);
+    background: var(--surface-panel);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: var(--text-button);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: box-shadow var(--duration-base) var(--ease-out);
+  }
+
+  .case-study-back:hover {
+    box-shadow: 0 0 32px var(--scene-fallback-glow-b);
+  }
+
+  .case-study-neighbours {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+
+  .case-study-neighbour {
+    display: grid;
+    gap: var(--space-1);
+    min-height: 44px;
+    padding: var(--space-4) var(--space-5);
+    border: 1px solid var(--border-control);
+    border-radius: var(--radius-control);
+    background: var(--surface-panel);
+    text-decoration: none;
+    transition: border-color var(--duration-base) var(--ease-out);
+  }
+
+  .case-study-neighbour-next {
+    text-align: right;
+  }
+
+  .case-study-neighbour:hover {
+    border-color: var(--text-signal);
+  }
+
+  .case-study-neighbour-label {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+
+  .case-study-neighbour-title {
+    color: var(--text-primary);
+    font-size: var(--text-h3-small);
+    font-weight: var(--weight-bold);
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 820px) {
+    .case-study-header {
+      padding-top: var(--space-6);
+    }
+
+    .case-study-decision-row {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-1);
+    }
+
+    .case-study-decision dt {
+      padding-top: 0;
+    }
+  }
+</style>

@@ -1,6 +1,7 @@
-// All user-facing copy and data of the site. Components render this file and never hard-code copy.
+// All user-facing copy and data of the home page, and the project data the case studies (./case-studies) build on.
+// Components render this file and never hard-code copy.
 // Facts that are not available yet are explicit placeholders: `npm run placeholders` lists them.
-// Keep this file free of runtime imports so scripts/list-placeholders.mjs can load it on its own.
+// Keep this file free of runtime imports: the case-study files import placeholder() from it.
 
 /** A value that has not been supplied yet. `hint` says what to put in its place. */
 export interface Placeholder {
@@ -142,6 +143,8 @@ export interface Portfolio {
     readonly opensInNewTab: string;
     readonly comingSoon: string;
     readonly projectLink: (title: string) => string;
+    /** Label of the link from a project card to its case study; it must include the title. */
+    readonly caseStudyLink: (title: string) => string;
     readonly privateRepository: string;
   };
   readonly sections: readonly Section[];
@@ -218,6 +221,7 @@ export const portfolio: Portfolio = {
     opensInNewTab: '(opens in a new tab)',
     comingSoon: 'Coming soon',
     projectLink: (title) => `View ${title} on GitHub`,
+    caseStudyLink: (title) => `Read the ${title} case study`,
     privateRepository: 'Private repository',
   },
   sections: [

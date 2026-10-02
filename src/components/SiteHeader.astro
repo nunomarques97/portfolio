@@ -1,18 +1,39 @@
 ---
+// The home page header: section links in a fixed pill row, and a Menu disclosure on narrow screens.
+// Given `home` (the home page URL), it is the header of another page instead: a home link and the same section links
+// pointing at the home page, in a static row that wraps on narrow screens and needs no script.
+import { caseStudyUi } from '../content/case-studies';
 import { portfolio } from '../content/portfolio';
+import NavMenu from './NavMenu.astro';
 
+interface Props {
+  home?: string;
+}
+
+const { home } = Astro.props;
 const { ui, sections } = portfolio;
 const links = sections.flatMap((section) =>
-  section.navLabel ? [{ href: `#${section.id}`, label: section.navLabel }] : [],
+  section.navLabel ? [{ href: `${home ?? ''}#${section.id}`, label: section.navLabel }] : [],
 );
 ---
 
-<header class="site-header">
+<header class:list={['site-header', { 'site-header-page': home !== undefined }]}>
+  {
+    home !== undefined && (
+      <a class="home-link" href={home} aria-label={caseStudyUi.homeLinkLabel}>
+        <span class="home-dot" aria-hidden="true" />
+        {caseStudyUi.homeLink}
+      </a>
+    )
+  }
   <nav class="site-nav" aria-label={ui.navLabel} data-site-nav>
-    <!-- Only shown on narrow screens when scripts run; without them the list itself stays visible. -->
-    <button type="button" class="menu-button" aria-expanded="false" aria-controls="site-nav-list" data-menu-button>
-      {ui.menuButton}
-    </button>
+    {
+      home === undefined && (
+        <button type="button" class="menu-button" aria-expanded="false" aria-controls="site-nav-list" data-menu-button>
+          {ui.menuButton}
+        </button>
+      )
+    }
     <ul class="nav-list" id="site-nav-list">
       {
         links.map((link) => (
@@ -24,38 +45,7 @@ const links = sections.flatMap((section) =>
     </ul>
   </nav>
 </header>
-
-<script>
-  const nav = document.querySelector<HTMLElement>('[data-site-nav]');
-  const button = nav?.querySelector<HTMLButtonElement>('[data-menu-button]');
-
-  if (nav && button) {
-    const setOpen = (open: boolean) => button.setAttribute('aria-expanded', String(open));
-    const isOpen = () => button.getAttribute('aria-expanded') === 'true';
-
-    button.addEventListener('click', () => setOpen(!isOpen()));
-
-    nav.addEventListener('keydown', (event) => {
-      if (event.key !== 'Escape' || !isOpen()) return;
-      setOpen(false);
-      button.focus();
-    });
-
-    // Choosing a link closes the menu; the browser then moves focus to the target section.
-    nav.addEventListener('click', (event) => {
-      if (event.target instanceof Element && event.target.closest('a')) setOpen(false);
-    });
-
-    document.addEventListener('pointerdown', (event) => {
-      if (isOpen() && event.target instanceof Node && !nav.contains(event.target)) setOpen(false);
-    });
-
-    // The disclosure only exists on narrow screens; widening the window resets it.
-    matchMedia('(min-width: 821px)').addEventListener('change', (event) => {
-      if (event.matches) setOpen(false);
-    });
-  }
-</script>
+{home === undefined && <NavMenu />}
 
 <style>
   .site-header {
@@ -163,6 +153,67 @@ const links = sections.flatMap((section) =>
       border-radius: var(--radius-chip);
       color: var(--text-primary);
       font-size: var(--text-label);
+    }
+  }
+
+  /* Header of a page other than home: in the page flow, home link on the left and the section links on the right. */
+  .site-header-page {
+    position: relative;
+    top: auto;
+    right: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4) var(--gutter) 0;
+  }
+
+  .home-link {
+    display: inline-flex;
+    gap: var(--space-3);
+    align-items: center;
+    min-height: 44px;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .home-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .home-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent-cyan);
+  }
+
+  .site-header-page .nav-list {
+    flex-wrap: wrap;
+  }
+
+  .site-header-page .nav-list a {
+    min-height: 44px;
+  }
+
+  @media (max-width: 820px) {
+    .site-header-page {
+      flex-direction: column;
+      align-items: flex-start;
+      position: relative;
+      top: auto;
+      left: auto;
+    }
+
+    /* The first link's label lines up with the home link above it. */
+    .site-header-page .nav-list {
+      margin-left: calc(-1 * var(--space-3));
     }
   }
 </style>

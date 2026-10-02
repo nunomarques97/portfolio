@@ -1,0 +1,36 @@
+---
+// Behaviour of the home page's Menu disclosure (see SiteHeader.astro). A component of its own so that pages whose
+// header has no Menu button ship no script for it.
+---
+
+<script>
+  const nav = document.querySelector<HTMLElement>('[data-site-nav]');
+  const button = nav?.querySelector<HTMLButtonElement>('[data-menu-button]');
+
+  if (nav && button) {
+    const setOpen = (open: boolean) => button.setAttribute('aria-expanded', String(open));
+    const isOpen = () => button.getAttribute('aria-expanded') === 'true';
+
+    button.addEventListener('click', () => setOpen(!isOpen()));
+
+    nav.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || !isOpen()) return;
+      setOpen(false);
+      button.focus();
+    });
+
+    // Choosing a link closes the menu; the browser then moves focus to the target section.
+    nav.addEventListener('click', (event) => {
+      if (event.target instanceof Element && event.target.closest('a')) setOpen(false);
+    });
+
+    document.addEventListener('pointerdown', (event) => {
+      if (isOpen() && event.target instanceof Node && !nav.contains(event.target)) setOpen(false);
+    });
+
+    // The disclosure only exists on narrow screens; widening the window resets it.
+    matchMedia('(min-width: 821px)').addEventListener('change', (event) => {
+      if (event.matches) setOpen(false);
+    });
+  }
+</script>

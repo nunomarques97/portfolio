@@ -1,6 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Browser, type Locator, type Page } from '@playwright/test';
-import { isPlaceholder, portfolio, projectHrefs } from '../../src/content/portfolio';
+import { caseStudyFor, caseStudyPath } from '../../src/content/case-studies';
+import { isPlaceholder, portfolio, projectHrefs, type Project } from '../../src/content/portfolio';
 
 // Integrated check of every rendering mode at both reference widths: the content layer must be complete, readable,
 // accessible and self-contained whatever the scene does (running, static, unavailable or never started).
@@ -11,6 +12,11 @@ const WEBGL_OFF_ARGS = ['--disable-webgl', '--disable-webgl2', '--disable-3d-api
 const { hero, about, projects, skills, experience, contact, ui } = portfolio;
 const featured = projects.items.filter((project) => project.featured);
 const sectionIds = portfolio.sections.map((section) => section.id);
+// The local build serves the site from the root, so internal links start with /.
+const cardHrefs = (project: Project) => [
+  caseStudyPath('/', caseStudyFor(project.repo)?.slug ?? `missing-${project.repo}`),
+  ...projectHrefs(project),
+];
 
 interface Mode {
   name: string;
@@ -281,7 +287,7 @@ async function keyboardWalk(page: Page) {
 const linkStops = [
   `hero ${hero.primaryAction.href}`,
   `hero ${hero.secondaryAction.href}`,
-  ...featured.flatMap((project) => projectHrefs(project).map((href) => `projects ${href}`)),
+  ...featured.flatMap((project) => cardHrefs(project).map((href) => `projects ${href}`)),
   ...(isPlaceholder(projects.profileLink.href) ? [] : [`projects ${projects.profileLink.href}`]),
   ...contact.links.flatMap((link) => (isPlaceholder(link.href) ? [] : [`contact ${link.href}`])),
   ...(isPlaceholder(contact.cv.file) ? [] : [`contact ${contact.cv.file}`]),

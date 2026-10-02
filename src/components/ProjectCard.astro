@@ -1,17 +1,20 @@
 ---
 // One featured project. `index` is its position among the featured projects: it sets the "01" label and the
 // scene cluster the card maps to. A placeholder URL renders as non-interactive text instead of a link, and a
-// private repository as a plain note, followed by any other links such as a demo or a store listing.
+// private repository as a plain note, followed by any other links such as a demo or a store listing. The first
+// link, to the project's case study on this site, opens in the same tab.
 import { isPlaceholder, type Portfolio, type Project } from '../content/portfolio';
 import Placeholder from './Placeholder.astro';
 
 interface Props {
   project: Project;
   index: number;
-  ui: Pick<Portfolio['ui'], 'projectLink' | 'privateRepository' | 'opensInNewTab' | 'comingSoon'>;
+  ui: Pick<Portfolio['ui'], 'projectLink' | 'caseStudyLink' | 'privateRepository' | 'opensInNewTab' | 'comingSoon'>;
+  /** URL of the project's case study, already prefixed with the site base. */
+  caseStudyHref: string;
 }
 
-const { project, index, ui } = Astro.props;
+const { project, index, ui, caseStudyHref } = Astro.props;
 const titleId = `project-${project.repo}-title`;
 const linkLabel = ui.projectLink(project.title);
 ---
@@ -25,6 +28,10 @@ const linkLabel = ui.projectLink(project.title);
     {project.tags.map((tag) => <li>{tag}</li>)}
   </ul>
   <div class="project-links">
+    <a class="project-link project-case-study" href={caseStudyHref}>
+      {ui.caseStudyLink(project.title)}
+      <span aria-hidden="true"> →</span>
+    </a>
     {
       project.url === null ? (
         <span class="project-link project-private">{ui.privateRepository}</span>

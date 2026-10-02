@@ -1,0 +1,55 @@
+---
+// One page per featured project, at projects/<slug>/. The build fails when a featured project has no case study
+// or a case study belongs to a project that is not featured.
+import type { GetStaticPaths } from 'astro';
+import CaseStudy from '../../components/CaseStudy.astro';
+import { caseStudies, caseStudyPath, caseStudyUi, withBase } from '../../content/case-studies';
+import { portfolio, type Project } from '../../content/portfolio';
+import CaseStudyLayout from '../../layouts/CaseStudyLayout.astro';
+
+export const getStaticPaths = (() => {
+  const featured = portfolio.projects.items.filter((project) => project.featured);
+  const studies = featured.map((project) => {
+    const study = caseStudies.find((item) => item.repo === project.repo);
+    if (!study) throw new Error(`featured project "${project.repo}" has no case study in src/content/case-studies`);
+    return { study, project };
+  });
+  const extra = caseStudies.filter((study) => !featured.some((project) => project.repo === study.repo));
+  if (extra.length) {
+    throw new Error(`case studies for projects that are not featured: ${extra.map((study) => study.repo).join(', ')}`);
+  }
+  return studies.map(({ study, project }, index) => {
+    const previous = studies[(index - 1 + studies.length) % studies.length] as (typeof studies)[number];
+    const next = studies[(index + 1) % studies.length] as (typeof studies)[number];
+    return {
+      params: { slug: study.slug },
+      props: { study, project, previous: previous.project, previousSlug: previous.study.slug, next: next.project, nextSlug: next.study.slug },
+    };
+  });
+}) satisfies GetStaticPaths;
+
+interface Props {
+  study: (typeof caseStudies)[number];
+  project: Project;
+  previous: Project;
+  previousSlug: string;
+  next: Project;
+  nextSlug: string;
+}
+
+const { study, project, previous, previousSlug, next, nextSlug } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+<CaseStudyLayout
+  title={caseStudyUi.pageTitle(project.title)}
+  description={caseStudyUi.pageDescription(project.title, project.pitch)}
+>
+  <CaseStudy
+    study={study}
+    project={project}
+    back={withBase(base, '#projects')}
+    previous={{ title: previous.title, href: caseStudyPath(base, previousSlug) }}
+    next={{ title: next.title, href: caseStudyPath(base, nextSlug) }}
+  />
+</CaseStudyLayout>

@@ -1,0 +1,91 @@
+---
+// Layout of the case-study pages: the shared fonts, tokens, header and footer on a still backdrop, with no scene,
+// no reveal and no script of its own. It follows the visitor's colour scheme (dark by default, see theme.css) and
+// their reduced-motion preference.
+import '../styles/theme.css';
+import '../styles/base.css';
+import SiteFooter from '../components/SiteFooter.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import { withBase } from '../content/case-studies';
+import { portfolio } from '../content/portfolio';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+const { site, ui } = portfolio;
+const base = import.meta.env.BASE_URL;
+const home = withBase(base);
+const favicon = withBase(base, 'favicon.svg');
+// Visit counter, set only by the deploy workflow, so local builds and tests never load it. It shows nothing on the page.
+const analyticsEndpoint: string | undefined = import.meta.env.GOATCOUNTER_ENDPOINT;
+---
+
+<!doctype html>
+<html lang={site.lang} data-color-scheme="auto">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={site.author} />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#04060d" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f4f7fb" media="(prefers-color-scheme: light)" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <link rel="icon" type="image/svg+xml" href={favicon} />
+    {analyticsEndpoint && <script is:inline async data-goatcounter={analyticsEndpoint} src="https://gc.zgo.at/count.js" />}
+  </head>
+  <body class="case-study-page">
+    <a class="skip-link" href="#main">{ui.skipLink}</a>
+    <div class="page-backdrop" aria-hidden="true"></div>
+    <SiteHeader home={home} />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <SiteFooter />
+  </body>
+</html>
+
+<style is:global>
+  /* A still version of the home page's fallback glow: the signal field without the scene. */
+  .page-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(60vw 60vw at 92% 8%, var(--scene-fallback-glow-a), transparent 60%),
+      radial-gradient(50vw 50vw at 100% 90%, var(--scene-fallback-glow-b), transparent 60%);
+  }
+
+  .case-study-page .site-header,
+  .case-study-page main {
+    position: relative;
+    z-index: 1;
+  }
+
+  .case-study-page main {
+    padding: 0 var(--gutter);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html[data-color-scheme='auto'] {
+      scroll-behavior: smooth;
+    }
+  }
+
+  /* No transition or animation runs for visitors who ask for reduced motion. */
+  @media (prefers-reduced-motion: reduce) {
+    html[data-color-scheme='auto'] *,
+    html[data-color-scheme='auto'] *::before,
+    html[data-color-scheme='auto'] *::after {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+</style>

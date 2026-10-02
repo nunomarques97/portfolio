@@ -161,6 +161,47 @@ describe('theme.css contrast pairs', () => {
   });
 });
 
+describe('theme.css case-study schemes', () => {
+  const names = [...rootVars.keys()];
+  const lightText = names.filter((name) => name.startsWith('--light-text-'));
+  const diagramLines = names.filter(
+    (name) => /^--(light-)?diagram-/.test(name) && !/-(surface|node|group)$/.test(name),
+  );
+  const autoBlock = declarations(blockAfter(withoutComments, ":root[data-color-scheme='auto']"));
+
+  it('checks every light text colour on the light page and on light panels', () => {
+    expect(lightText.length).toBeGreaterThanOrEqual(5);
+    for (const name of lightText) {
+      const body = pairs.filter((p) => p.kind === 'body' && p.foreground === name);
+      expect(body.some((p) => p.layers.join(' ') === '--light-bg'), name).toBe(true);
+      expect(body.some((p) => p.layers.join(' over ') === '--light-surface over --light-bg'), name).toBe(true);
+    }
+  });
+
+  it('checks every diagram line colour, in both schemes, against the diagram surface', () => {
+    expect(diagramLines.length).toBeGreaterThanOrEqual(10);
+    for (const name of diagramLines) {
+      const surface = name.startsWith('--light-') ? '--light-diagram-surface' : '--diagram-surface';
+      expect(pairs.some((p) => p.kind === 'ui' && p.foreground === name && p.layers[0] === surface), name).toBe(true);
+    }
+  });
+
+  it('swaps in a light token for every colour the case-study pages use', () => {
+    expect(css).toMatch(/@media \(prefers-color-scheme: light\)\s*{\s*:root\[data-color-scheme='auto'\]/);
+    expect(autoBlock.get('--focus-ring')).toBe('var(--light-focus-ring)');
+    for (const [name, value] of autoBlock) {
+      const light = /^var\((--light-[\w-]+)\)$/.exec(value)?.[1];
+      expect(light, name).toBeDefined();
+      expect(rootVars.has(light as string), `${light} is declared`).toBe(true);
+      expect(rootVars.has(name), `${name} is a dark token`).toBe(true);
+    }
+    const darkText = names.filter((name) => name.startsWith('--text-') && name !== '--text-on-accent');
+    for (const name of ['--color-bg', ...darkText.filter((n) => variable(n).startsWith('#')), '--border-control']) {
+      expect(autoBlock.has(name), name).toBe(true);
+    }
+  });
+});
+
 describe('theme.css motion', () => {
   const durations = [...rootVars.keys()].filter((name) => name.startsWith('--duration-'));
 

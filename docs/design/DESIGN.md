@@ -149,8 +149,9 @@ HUD is hidden. Nothing scales the desktop poster down: the composition changes f
   "(opens in a new tab)" text. The card being read (desktop) gets `--border-active`, a soft cyan glow, and moves 8 px
   right over `--duration-emphasis`. The scrim contrast pairs assume this shift; a larger one needs a matching `@pair`.
   Only the ten featured projects are rendered, in order: FORJA, Tollwise, Gearlift, Repcastr, Crypto Radar, Jarvis,
-  Statehop, Velora Poker, SeekAI, Sextant. After the description a card lists its links: the GitHub repository, or a
-  muted "Private repository" note when the code is private, then any demo or store link.
+  Statehop, Velora Poker, SeekAI, Sextant. After the description a card lists its links: first "Read the <name> case
+  study →", an internal link in the same tab (no ↗) to the project's case study page (see Case study pages), then the
+  GitHub repository, or a muted "Private repository" note when the code is private, then any demo or store link.
 - **Stack tags (in cards).** Mono 11 px pills, hairline border, muted text. They are not interactive, so the hairline
   is decoration.
 - **Skill chips.** Four groups (Frontend, Backend, Applied AI, Quality & delivery) in a 2 × 2 grid of panels (one
@@ -305,6 +306,103 @@ shown and the HUD shows its initial state.
   (never under 24 px).
 - External links are marked visually (↗) and for screen readers ("opens in a new tab"). Placeholders are never links.
 - `html lang="en"`; motion plays for every visitor (see Reduced motion); nothing flashes.
+
+## Case study pages
+
+Each featured project has a long-form page at `projects/<slug>/`, linked from its card. The pages speak the same
+signal-field language as the home page, without the scene: the same fonts, tokens, eyebrows, panels, pills and focus
+ring, on a still backdrop. Everything on this section applies to these pages only; the home page is unchanged.
+
+**Layout.** One reading column, `min(760px, 100%)`, left-aligned at the gutter like the home column. Prose is capped
+at 68ch. From top to bottom:
+
+- **Header**, in the page flow (not fixed): on the left a home link ("Nuno Marques", mono 12 px uppercase, with a
+  static 8 px cyan dot); on the right the same section links as the home nav, pointing at the home page sections
+  (`<base>#about` and so on). At 820 px and below the home link sits above the links, which wrap; there is no Menu
+  button, so the pages need no script.
+- **Title block.** Eyebrow "Case study", the project title as the page's only h1 (`--text-case-title`,
+  clamp(44px, 6vw, 84px), 700, `--text-primary`, no gradient), the card's pitch as the lede, then a meta strip: the
+  card's tags and its links (GitHub ↗ or the muted "Private repository" note, then any demo, store or site link).
+- **Six sections**, each an h2 (`--text-case-h2`, clamp(28px, 2.6vw, 36px)) above a hairline: Problem (paragraphs),
+  Constraints (list), Architecture (diagram), Key decisions (one panel per decision with Decision, Rejected and Why
+  rows; the labels are mono 12 px `--text-accent`, side by side on desktop and stacked on mobile), Results (list),
+  Next steps (list). List markers are `--text-accent`.
+- **Pager.** A "← Back to all projects" pill to `<base>#projects`, then two cards linking to the previous and next
+  case study, in card order and wrapping around (label mono 11 px muted, title 20 px 700).
+- **Backdrop.** `--color-bg` with the two fallback glows of the home page, top right and bottom right, fixed and
+  still. No canvas, grid, scrim, scanlines, HUD or progress bar.
+
+Placeholders use the existing placeholder styling: dashed `--border-control` border, `--text-muted` text, a mono
+"Coming soon" label followed by the hint of what is missing, `data-placeholder`, never a link. A pending diagram is a
+placeholder block the width of the column.
+
+### Light palette
+
+The pages follow `prefers-color-scheme`. Dark, the palette above, is the default. A light preference swaps in the
+`--light-*` tokens (`:root[data-color-scheme='auto']` in `theme.css`); the home page never sets that attribute and
+stays dark.
+
+| Variable | Value | Replaces |
+| --- | --- | --- |
+| `--light-bg` | `#f4f7fb` | `--color-bg` |
+| `--light-surface` | `#ffffff` | `--surface-panel` (opaque, no blur) |
+| `--light-text-primary` | `#0a1222` | `--text-primary` |
+| `--light-text-body` | `#27354d` | `--text-body` |
+| `--light-text-muted` | `#4a5a73` | `--text-muted` |
+| `--light-text-signal` | `#0b6b80` | `--text-signal` |
+| `--light-text-accent` | `#6a3fcf` | `--text-accent` |
+| `--light-line-hairline` | `rgba(39, 53, 77, 0.16)` | `--line-hairline` |
+| `--light-border-control` | `#66758e` | `--border-control` |
+| `--light-focus-ring` | `#0b6b80` | `--focus-ring` |
+| `--light-glow-a` / `-b` | cyan at 0.08 / violet at 0.07 | the backdrop glows |
+
+Diagram tokens, dark / light: `--diagram-surface` `#070c18` / `#ffffff`, `--diagram-node` `#0d1528` / `#eef3f9`,
+`--diagram-stroke` `#64789a` / `#66758e`, `--diagram-client` `#22d3ee` / `#0b7285`, `--diagram-store` `#a78bfa` /
+`#6a3fcf`, `--diagram-external` and `--diagram-edge` `#8fa3bf` / `#5d6d87`, `--diagram-group` (decorative)
+`rgba(143, 163, 191, 0.32)` / `rgba(39, 53, 77, 0.24)`.
+
+### Contrast on case study pages
+
+Every pair below has an `@pair` entry in `theme.css` and is checked by `theme.test.ts`.
+
+| Foreground | Dark: panel over page | Dark: diagram node / surface | Light: page | Light: panel or diagram surface | Light: diagram node | Minimum |
+| --- | --- | --- | --- | --- | --- | --- |
+| Primary text | 17.56 | 15.98 / 17.17 | 17.41 | 18.71 | 16.77 | 4.5 |
+| Body text | 13.35 | 12.15 / 13.06 | 11.48 | 12.33 | 11.06 | 4.5 |
+| Muted text | 7.76 | – / 7.59 | 6.51 | 7.00 | – | 4.5 |
+| Signal text | 11.06 | – | 5.70 | 6.12 | – | 4.5 |
+| Accent text | 7.34 | – / 7.18 | 6.06 | 6.51 | – | 4.5 |
+| Control border | 4.47 | – | 4.34 | 4.67 | – | 3 |
+| Focus ring | 11.06 | – | 5.70 | 6.12 | – | 3 |
+
+Diagram lines on the diagram surface, dark / light: node stroke 4.37 / 4.67, client 10.81 / 5.59, store 7.18 / 6.51,
+external node and edges 7.59 / 5.25 (minimum 3). The light skip link (page colour on primary text) is 17.41.
+
+### Architecture diagrams
+
+- Drawn by one component (`Diagram.astro`) from typed data in the case-study file: nodes in reading order, optional
+  groups of consecutive nodes, and edges with labels. Inline SVG, so it is part of the page and costs no request.
+- One column, top to bottom, at every width: a 320-unit viewBox, 100% of the column on mobile and at most 400 px
+  wide on desktop, where the text equivalent sits beside it. At 390 px one unit is about 1.1 CSS px, so the smallest
+  label (12 units) renders at 13 px; nothing in the drawing is under 12 CSS px at 390 px and it never scrolls
+  sideways.
+- Node kinds: the caller (client) with a cyan stroke and rounder corners, components with the neutral stroke, data
+  stores with a violet stroke and a band across the top, third parties on the surface colour with a muted stroke.
+  Labels are Space Grotesk 700 at 15 units (`--text-primary`), details 13 units (`--text-body`). Group labels are
+  mono 12 units uppercase, `--text-accent`, right-aligned in a hairline frame.
+- An edge to the next node is a straight arrow with its label beside it in `--text-muted`. An edge further down runs
+  in a lane on the right and an edge back up in a lane on the left; their labels are in the text equivalent only.
+- Every colour is a theme variable set from the stylesheet, so the drawing follows the colour scheme. No colour is
+  written into the SVG.
+- Accessibility: the SVG has `role="img"`, a `<title>` and a `<desc>` (`aria-labelledby` / `aria-describedby`), and a
+  visible ordered list after it, "The flow, step by step", states every node and every edge with its label.
+
+### Reduced motion on case study pages
+
+Unlike the home page (see Reduced motion), the case study pages respect `prefers-reduced-motion: reduce`: no
+transition or animation runs and anchor jumps are instant. Without the preference, the only motion is the hover
+feedback of links and the pager (`--duration-base`) and smooth anchor scrolling. There is no reveal, decode, scene or
+pulse on these pages, and no script at all, so the content is complete without JavaScript.
 
 ## Open visual points
 

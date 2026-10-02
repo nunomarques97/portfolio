@@ -59,6 +59,54 @@
  * @pair focus --focus-ring on --color-bg
  * @pair focus --focus-ring on --color-bg/--scrim-column-alpha over --color-particle-peak
  * @pair focus --focus-ring on --color-bg/--backing-mobile-alpha over --color-particle-peak
+ *
+ * Case-study pages, dark scheme (the default): text on the page, on panels and in the architecture diagram
+ * @pair body --text-primary on --surface-panel over --color-bg
+ * @pair body --text-body on --surface-panel over --color-bg
+ * @pair body --text-muted on --surface-panel over --color-bg
+ * @pair body --text-signal on --surface-panel over --color-bg
+ * @pair body --text-accent on --surface-panel over --color-bg
+ * @pair body --text-primary on --diagram-node
+ * @pair body --text-body on --diagram-node
+ * @pair body --text-primary on --diagram-surface
+ * @pair body --text-body on --diagram-surface
+ * @pair body --text-muted on --diagram-surface
+ * @pair body --text-accent on --diagram-surface
+ * @pair ui --diagram-stroke on --diagram-surface
+ * @pair ui --diagram-client on --diagram-surface
+ * @pair ui --diagram-store on --diagram-surface
+ * @pair ui --diagram-external on --diagram-surface
+ * @pair ui --diagram-edge on --diagram-surface
+ * @pair ui --border-control on --surface-panel over --color-bg
+ * @pair focus --focus-ring on --surface-panel over --color-bg
+ *
+ * Case-study pages, light scheme: the --light-* tokens that replace the dark ones under prefers-color-scheme: light
+ * @pair body --light-text-primary on --light-bg
+ * @pair body --light-text-body on --light-bg
+ * @pair body --light-text-muted on --light-bg
+ * @pair body --light-text-signal on --light-bg
+ * @pair body --light-text-accent on --light-bg
+ * @pair body --light-text-primary on --light-surface over --light-bg
+ * @pair body --light-text-body on --light-surface over --light-bg
+ * @pair body --light-text-muted on --light-surface over --light-bg
+ * @pair body --light-text-signal on --light-surface over --light-bg
+ * @pair body --light-text-accent on --light-surface over --light-bg
+ * @pair body --light-bg on --light-text-primary
+ * @pair body --light-text-primary on --light-diagram-node
+ * @pair body --light-text-body on --light-diagram-node
+ * @pair body --light-text-primary on --light-diagram-surface
+ * @pair body --light-text-body on --light-diagram-surface
+ * @pair body --light-text-muted on --light-diagram-surface
+ * @pair body --light-text-accent on --light-diagram-surface
+ * @pair ui --light-diagram-stroke on --light-diagram-surface
+ * @pair ui --light-diagram-client on --light-diagram-surface
+ * @pair ui --light-diagram-store on --light-diagram-surface
+ * @pair ui --light-diagram-external on --light-diagram-surface
+ * @pair ui --light-diagram-edge on --light-diagram-surface
+ * @pair ui --light-border-control on --light-bg
+ * @pair ui --light-border-control on --light-surface over --light-bg
+ * @pair focus --light-focus-ring on --light-bg
+ * @pair focus --light-focus-ring on --light-surface over --light-bg
  */
 
 :root {
@@ -134,6 +182,8 @@
   --text-contact: clamp(44px, 6vw, 88px);
   --text-h2: clamp(34px, 4.2vw, 60px);
   --text-h3: 26px;
+  --text-case-title: clamp(44px, 6vw, 84px);
+  --text-case-h2: clamp(28px, 2.6vw, 36px);
   --text-h3-small: 20px;
   --text-lede: clamp(18px, 1.6vw, 22px);
   --text-base: 17px;
@@ -178,6 +228,41 @@
   --duration-pulse: 2000ms;
   --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Architecture diagrams on case-study pages (dark scheme) */
+  --diagram-surface: #070c18;
+  --diagram-node: #0d1528;
+  --diagram-stroke: #64789a;
+  --diagram-client: #22d3ee;
+  --diagram-store: #a78bfa;
+  --diagram-external: #8fa3bf;
+  --diagram-edge: #8fa3bf;
+  --diagram-group: rgba(143, 163, 191, 0.32);
+
+  /*
+   * Light scheme of the case-study pages. Only :root[data-color-scheme='auto'] uses these, under
+   * prefers-color-scheme: light (see below); the home page stays dark.
+   */
+  --light-bg: #f4f7fb;
+  --light-surface: #ffffff;
+  --light-text-primary: #0a1222;
+  --light-text-body: #27354d;
+  --light-text-muted: #4a5a73;
+  --light-text-signal: #0b6b80;
+  --light-text-accent: #6a3fcf;
+  --light-line-hairline: rgba(39, 53, 77, 0.16);
+  --light-border-control: #66758e;
+  --light-focus-ring: #0b6b80;
+  --light-glow-a: rgba(11, 107, 128, 0.08);
+  --light-glow-b: rgba(106, 63, 207, 0.07);
+  --light-diagram-surface: #ffffff;
+  --light-diagram-node: #eef3f9;
+  --light-diagram-stroke: #66758e;
+  --light-diagram-client: #0b7285;
+  --light-diagram-store: #6a3fcf;
+  --light-diagram-external: #5d6d87;
+  --light-diagram-edge: #5d6d87;
+  --light-diagram-group: rgba(39, 53, 77, 0.24);
 }
 
 @media (max-width: 820px) {
@@ -185,5 +270,36 @@
     --column: 100%;
     --text-base: 16px;
     --section-pad-top: 14vh;
+  }
+}
+
+/*
+ * Pages that follow the visitor's colour scheme (the case studies) set data-color-scheme="auto" on <html>. Dark,
+ * the palette above, is the default; a light preference swaps in the --light-* tokens.
+ */
+@media (prefers-color-scheme: light) {
+  :root[data-color-scheme='auto'] {
+    color-scheme: light;
+    --color-bg: var(--light-bg);
+    --text-primary: var(--light-text-primary);
+    --text-body: var(--light-text-body);
+    --text-muted: var(--light-text-muted);
+    --text-signal: var(--light-text-signal);
+    --text-accent: var(--light-text-accent);
+    --surface-panel: var(--light-surface);
+    --surface-panel-mobile: var(--light-surface);
+    --line-hairline: var(--light-line-hairline);
+    --border-control: var(--light-border-control);
+    --focus-ring: var(--light-focus-ring);
+    --scene-fallback-glow-a: var(--light-glow-a);
+    --scene-fallback-glow-b: var(--light-glow-b);
+    --diagram-surface: var(--light-diagram-surface);
+    --diagram-node: var(--light-diagram-node);
+    --diagram-stroke: var(--light-diagram-stroke);
+    --diagram-client: var(--light-diagram-client);
+    --diagram-store: var(--light-diagram-store);
+    --diagram-external: var(--light-diagram-external);
+    --diagram-edge: var(--light-diagram-edge);
+    --diagram-group: var(--light-diagram-group);
   }
 }

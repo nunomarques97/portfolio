@@ -1,15 +1,20 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { isPlaceholder, portfolio, projectHrefs } from '../../src/content/portfolio';
+import { caseStudyFor, caseStudyPath } from '../../src/content/case-studies';
+import { isPlaceholder, portfolio, projectHrefs, type Project } from '../../src/content/portfolio';
 
 const desktop = { width: 1440, height: 900 };
 const mobile = { width: 390, height: 844 };
 const { projects, contact, skills, experience, ui } = portfolio;
 const featured = projects.items.filter((project) => project.featured);
+// The local build serves the site from the root, so internal links start with /.
+const caseStudyHref = (project: Project) =>
+  caseStudyPath('/', caseStudyFor(project.repo)?.slug ?? `missing-${project.repo}`);
+const cardHrefs = (project: Project) => [caseStudyHref(project), ...projectHrefs(project)];
 
 /** Links the keyboard must reach, in visual order: project cards, the profile link, then contact rows. */
 const expectedStops = [
-  ...featured.flatMap((project) => projectHrefs(project).map((href) => `projects ${href}`)),
+  ...featured.flatMap((project) => cardHrefs(project).map((href) => `projects ${href}`)),
   ...(isPlaceholder(projects.profileLink.href) ? [] : [`projects ${projects.profileLink.href}`]),
   ...contact.links.flatMap((link) => (isPlaceholder(link.href) ? [] : [`contact ${link.href}`])),
   ...(isPlaceholder(contact.cv.file) ? [] : [`contact ${contact.cv.file}`]),
@@ -47,7 +52,7 @@ for (const viewport of [desktop, mobile]) {
   test.describe(`at ${viewport.width} px`, () => {
     test.use({ viewport });
 
-    test('projects render the featured content in order with GitHub links', async ({ page }) => {
+    test('projects render the featured content in order with case-study and GitHub links', async ({ page }) => {
       await page.goto('/');
       const section = page.locator('#projects');
       await expect(section.getByRole('heading', { level: 2 })).toHaveText(projects.heading);
@@ -65,9 +70,15 @@ for (const viewport of [desktop, mobile]) {
           ...(project.url === null ? [] : [ui.projectLink(project.title)]),
           ...(project.links ?? []).map((link) => link.label),
         ];
-        await expect(links).toHaveCount(names.length);
+        await expect(links).toHaveCount(names.length + 1);
+        // First the case study on this site, in the same tab.
+        const study = links.first();
+        await expect(study).toHaveAttribute('href', caseStudyHref(project));
+        await expect(study).not.toHaveAttribute('target');
+        await expect(study).toHaveAccessibleName(ui.caseStudyLink(project.title));
+        await expect(study).not.toContainText('↗');
         for (const [position, href] of projectHrefs(project).entries()) {
-          const link = links.nth(position);
+          const link = links.nth(position + 1);
           await expect(link).toHaveAttribute('href', href);
           await expect(link).toHaveAttribute('target', '_blank');
           await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
@@ -82,7 +93,7 @@ for (const viewport of [desktop, mobile]) {
       const hrefs = await section
         .locator('article a[href]')
         .evaluateAll((links) => links.map((link) => link.getAttribute('href')));
-      expect(hrefs).toEqual(featured.flatMap(projectHrefs));
+      expect(hrefs).toEqual(featured.flatMap(cardHrefs));
 
       const profile = section.getByRole('link', { name: projects.profileLink.label });
       await expect(profile).toHaveAttribute('href', String(projects.profileLink.href));

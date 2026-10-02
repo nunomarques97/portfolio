@@ -1,7 +1,7 @@
 # Portfolio
 
-Personal portfolio of Nuno Marques, Senior Full Stack Developer. A single-page static site built with
-[Astro](https://astro.build) and TypeScript.
+Personal portfolio of Nuno Marques, Senior Full Stack Developer. A static site built with
+[Astro](https://astro.build) and TypeScript: one home page, plus a case-study page for each featured project.
 
 Live at <https://nunomarques97.github.io/portfolio/>. Every push to `main` is deployed by
 `.github/workflows/pages.yml`.
@@ -30,7 +30,7 @@ npm run preview   # serve the production build
 
 ## Edit the content
 
-All copy and data live in one typed file, `src/content/portfolio.ts`. Components only render it, so changing a
+The home page copy and data live in one typed file, `src/content/portfolio.ts`. Components only render it, so changing a
 text, link, project, skill or role never needs a component change:
 
 - **Hero and About:** `hero` (name, title, location, tagline, the two actions) and `about` (paragraphs, stats and
@@ -48,15 +48,38 @@ links: a pending link shows as non-interactive text and the pending portrait as 
 approved private details are the contact email, phone number and LinkedIn; the unit tests reject any other phone
 number.
 
+### Case studies
+
+Each featured project has a case study at `projects/<slug>/`, linked from its card. Its text lives in
+`src/content/case-studies/<slug>.ts`, one file per project; `src/content/case-studies/index.ts` lists them in card
+order and defines their types. The page title, pitch, tags and links come from the project's entry in
+`src/content/portfolio.ts`, so they are never repeated. A case-study file has:
+
+- `repo` (the project's `repo` in `portfolio.ts`) and `slug` (the URL segment);
+- `problem` (paragraphs), `constraints`, `results` and `nextSteps` (list items);
+- `diagram`: the architecture diagram as data. Nodes are drawn top to bottom in array order, each with a `kind`
+  (`client`, `component`, `store` or `external`), a `label`, an optional one-line `detail` and an optional `group`
+  (the nodes of a group must be consecutive). An edge to the next node becomes a straight arrow with its label; any
+  other edge runs along the side. The page also lists every node and edge as text under the drawing.
+- `decisions`: each with the `decision`, the `rejected` alternative and the `reason`.
+
+Every featured project must have exactly one case study, and only featured projects may have one: the build and the
+unit tests fail otherwise. When a project is added to or removed from the featured cards, add or remove its file and
+its entry in `index.ts`. Any field can be `placeholder('what to put here')` until the fact is known; it shows as a
+marked "Coming soon" note with that hint, never as a link. The unit tests reject em-dashes, the employer's name,
+phone numbers, email addresses, `http://` links and links other than site pages and the project's own links in
+`portfolio.ts`, and the names of other local repositories.
+
 ### Remaining placeholders
 
 ```sh
 npm run placeholders
 ```
 
-lists every placeholder left, with its path and what to supply. There are none at the moment: the portrait is
-`src/assets/portrait/nuno-marques.png` (a larger 4:5 photo, at least 704 × 880 px, would be sharper) and the CV is
-`public/nuno-marques-cv.pdf`.
+lists every placeholder left, with its path and what to supply: first those in `src/content/portfolio.ts`, then
+those in the case studies, with paths such as `caseStudies.tollwise.results[5]`. The main content file has none at
+the moment: the portrait is `src/assets/portrait/nuno-marques.png` (a larger 4:5 photo, at least 704 × 880 px, would
+be sharper) and the CV is `public/nuno-marques-cv.pdf`.
 
 ## Test
 
@@ -67,6 +90,7 @@ npm test            # unit tests (Vitest)
 npm run test:e2e    # browser tests (Playwright) against a fresh production build on a free port
 npm run budget      # gzip size budgets of the production build (initial JS, scene chunk, CSS, fonts)
 npm run fps         # frame rate while scrolling, in a headed browser with the GPU (1440 and 390 tiers)
+npm run lighthouse  # Lighthouse audit of a case study (tollwise by default; npm run lighthouse -- sextant)
 npm run placeholders
 node scripts/guard-keys.mjs --all
 ```
@@ -76,8 +100,20 @@ WebGL off, JavaScript disabled): every section and its content visible, no serio
 horizontal overflow, no console errors and no request that leaves the site origin. It also walks the page with the
 keyboard from the skip link to the last contact link. Run it alone with `npx playwright test tests/e2e/matrix.spec.ts`.
 
+`tests/e2e/case-studies.spec.ts` checks every case-study page: its route and title, the link from its card, axe in
+the light and dark schemes at 1440 and 390 px, a keyboard walk, no script and no request off the site, no motion
+under reduced motion, content without JavaScript, diagram labels of at least 12 px and no horizontal overflow at 320,
+390 and 1440 px. It saves full-page screenshots of the Tollwise case study at 1440×900 and 390×844 in both schemes to
+`test-results/screenshots/case-study/tollwise-<width>-<scheme>.png` and prints their paths.
+
 The frame rate script needs a hardware GPU: it fails rather than report a measurement taken with a software
 renderer. Its results describe the machine it runs on.
+
+The Lighthouse script builds the site, serves it on a free port and audits `projects/<slug>/` in the same installed
+browser as the browser tests, first with Lighthouse's mobile preset (emulated phone, simulated slow network and CPU)
+and then with its desktop preset. It prints the performance, accessibility, best practices and SEO scores of each
+preset, lists the audits that cost points in any category under 95, writes the HTML reports to
+`test-results/lighthouse/<slug>-<preset>.html` and exits with a non-zero code if any of those scores is below 95.
 
 Every script also runs without npm or a shell, which is useful on Windows and in automation:
 

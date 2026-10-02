@@ -1,0 +1,236 @@
+---
+// An architecture diagram drawn as inline SVG from typed data (see `Diagram` in src/content/case-studies). The SVG
+// is one image for assistive technology, named by its title and description; the ordered list after it states the
+// same flow as text, so nothing is only in the drawing. Colours are theme variables, so it follows the page scheme.
+import { caseStudyUi } from '../content/case-studies';
+import type { Diagram } from '../content/case-studies';
+import { FONT, flowSteps, layoutDiagram } from './diagram-layout';
+
+interface Props {
+  diagram: Diagram;
+  /** Prefix for the ids inside the drawing, unique on the page. */
+  id: string;
+}
+
+const { diagram, id } = Astro.props;
+const layout = layoutDiagram(diagram);
+const steps = flowSteps(diagram);
+const titleId = `${id}-title`;
+const descId = `${id}-desc`;
+const flowId = `${id}-flow`;
+---
+
+<figure class="diagram" data-diagram>
+  <svg
+    class="diagram-svg"
+    viewBox={`0 0 ${layout.width} ${layout.height}`}
+    width={layout.width}
+    height={layout.height}
+    role="img"
+    aria-labelledby={titleId}
+    aria-describedby={descId}
+    data-view-width={layout.width}
+  >
+    <title id={titleId}>{diagram.title}</title>
+    <desc id={descId}>{diagram.description}</desc>
+    <rect class="diagram-surface" x="0" y="0" width={layout.width} height={layout.height} rx="14" />
+    {
+      layout.groups.map((group) => (
+        <g class="diagram-group">
+          <rect x={group.x} y={group.y} width={group.width} height={group.height} rx="12" />
+          <text x={group.label.x} y={group.label.y} font-size={FONT.group} text-anchor="end">
+            {group.label.text}
+          </text>
+        </g>
+      ))
+    }
+    {
+      layout.nodes.map((node) => (
+        <g class:list={['diagram-node', `diagram-node-${node.kind}`]}>
+          <rect x={node.x} y={node.y} width={node.width} height={node.height} rx={node.kind === 'client' ? 12 : 8} />
+          {node.kind === 'store' && (
+            <line class="diagram-store-band" x1={node.x} x2={node.x + node.width} y1={node.y + 6} y2={node.y + 6} />
+          )}
+          {node.label.map((line) => (
+            <text class="diagram-label" x={line.x} y={line.y} font-size={FONT.label}>
+              {line.text}
+            </text>
+          ))}
+          {node.detail.map((line) => (
+            <text class="diagram-detail" x={line.x} y={line.y} font-size={FONT.detail}>
+              {line.text}
+            </text>
+          ))}
+        </g>
+      ))
+    }
+    {
+      layout.edges.map((edge) => (
+        <g class="diagram-edge">
+          <path d={edge.line} />
+          <polygon points={edge.head} />
+          {edge.label.map((line) => (
+            <text x={line.x} y={line.y} font-size={FONT.edge}>
+              {line.text}
+            </text>
+          ))}
+        </g>
+      ))
+    }
+  </svg>
+  <figcaption class="diagram-caption">
+    <h3 id={flowId} class="diagram-flow-heading">{caseStudyUi.flowHeading}</h3>
+    <ol class="diagram-flow" aria-labelledby={flowId}>
+      {
+        steps.map((step) => (
+          <li>
+            <span class="diagram-flow-label">{step.label}</span>
+            {step.group && <span class="diagram-flow-group"> ({step.group})</span>}
+            {step.detail && <span>: {step.detail}.</span>}
+            {step.next.length > 0 && (
+              <ul class="diagram-flow-next">
+                {step.next.map((next) => (
+                  <li>
+                    <span aria-hidden="true">→ </span>
+                    {caseStudyUi.flowTo} {next.to}
+                    {next.label && <span>: {next.label}</span>}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+        ))
+      }
+    </ol>
+  </figcaption>
+</figure>
+
+<style>
+  .diagram {
+    display: grid;
+    gap: var(--space-5);
+    margin: 0;
+  }
+
+  .diagram-svg {
+    display: block;
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+  }
+
+  .diagram-surface {
+    fill: var(--diagram-surface);
+    stroke: var(--line-hairline);
+  }
+
+  .diagram-group rect {
+    fill: none;
+    stroke: var(--diagram-group);
+    stroke-width: 1;
+  }
+
+  .diagram-group text {
+    fill: var(--text-accent);
+    font-family: var(--font-mono);
+    letter-spacing: 0.12em;
+  }
+
+  .diagram-node rect {
+    fill: var(--diagram-node);
+    stroke: var(--diagram-stroke);
+    stroke-width: 1.25;
+  }
+
+  .diagram-node-client rect {
+    stroke: var(--diagram-client);
+    stroke-width: 1.75;
+  }
+
+  .diagram-node-store rect,
+  .diagram-store-band {
+    stroke: var(--diagram-store);
+    stroke-width: 1.5;
+  }
+
+  .diagram-node-external rect {
+    fill: var(--diagram-surface);
+    stroke: var(--diagram-external);
+    stroke-width: 1.5;
+  }
+
+  .diagram-label {
+    fill: var(--text-primary);
+    font-family: var(--font-sans);
+    font-weight: var(--weight-bold);
+  }
+
+  .diagram-detail {
+    fill: var(--text-body);
+    font-family: var(--font-sans);
+  }
+
+  .diagram-edge path {
+    fill: none;
+    stroke: var(--diagram-edge);
+    stroke-width: 1.5;
+  }
+
+  .diagram-edge polygon {
+    fill: var(--diagram-edge);
+  }
+
+  .diagram-edge text {
+    fill: var(--text-muted);
+    font-family: var(--font-sans);
+  }
+
+  .diagram-flow-heading {
+    margin: 0 0 var(--space-3);
+    color: var(--text-accent);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    font-weight: var(--weight-regular);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+
+  .diagram-flow {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0;
+    padding-left: 1.4em;
+    color: var(--text-body);
+    font-size: var(--text-small);
+  }
+
+  .diagram-flow-label {
+    color: var(--text-primary);
+    font-weight: var(--weight-bold);
+  }
+
+  .diagram-flow-group {
+    color: var(--text-muted);
+  }
+
+  .diagram-flow-next {
+    margin: var(--space-1) 0 0;
+    padding: 0;
+    list-style: none;
+    color: var(--text-muted);
+  }
+
+  .diagram-flow li,
+  .diagram-flow-next li {
+    overflow-wrap: anywhere;
+  }
+
+  /* Side by side when the column is wide enough: drawing on the left, its text equivalent beside it. */
+  @media (min-width: 821px) {
+    .diagram {
+      grid-template-columns: minmax(0, 400px) minmax(0, 1fr);
+      align-items: start;
+      gap: var(--space-6);
+    }
+  }
+</style>
